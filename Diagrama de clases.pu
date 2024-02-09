@@ -1,0 +1,16 @@
+@startuml Musify
+class Main{
+    + abrirVentana(): void
+}
+
+interface Descargable{
+    + descargar(url: String): void
+}
+
+class YouTube{
+    
+}
+
+Descargable <|-. YouTube
+
+@enduml

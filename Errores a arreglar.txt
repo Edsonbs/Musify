@@ -1,0 +1,2 @@
+Cuando descargo un archivo MP3, el archivo se descarga corrupto. Creo que simplemente se descarga sin compresión y se introduce forzosamente en un contenedor .mp3.
+Tengo que recodificar todo el programa debido a que es muy difícil de actualizar este código.

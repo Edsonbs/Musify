@@ -1,0 +1,18 @@
+Los datos que necesitaré son los siguientes:
+- Ubicación de descarga. ✅
+- Link de descarga. ✅
+- Tipo de descarga (Sonido / Video). ✅
+- Habilitar o deshabilitar sistema de filtrado de nombres (eliminar palabras como "Videoclip Official", o "[Official Videoclip]"). ✅
+
+Ahora tendré que crear una forma de que la interfaz gráfica sea útil, de forma que tendré que hacer el backend.
+- Función para distinguir que el video sea de YouTube o de alguna otra plataforma. ✅
+- Función para descargar música de YouTube. ✅
+- Función para descargar video de YouTube. ✅
+
+Próximas actualizaciones.
+- Permitir la descarga de Música desde Spotify.
+- Permitir la descarga de Videos desde Twitter.
+- Permitir la descarga de Videos desde Instagram.
+- Permitir la descarga de Videos desde Twitch.
+
+Emplea varios hilos de ejecución para realizar las tareas que ha de cumplir, de forma que podrá hacer 2 cosas simultáneamente.
