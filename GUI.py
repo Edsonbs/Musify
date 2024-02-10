@@ -46,6 +46,7 @@ class InterfazGrafica:
                                     [gui.Text("", text_color="red", font=f"{self.TIPOGRAFIA_2} {self.TAMANO_TEXTO_SIMPLE}", key="mostrarError", justification="center", size=(500, 1))],
                                     [gui.Column([[gui.Text("Descargadas:", font=(self.TIPOGRAFIA_3, self.TAMANO_TEXTO_SIMPLE), text_color="white", key="contadorDescargadas")]], background_color="#24262C", scrollable=True, vertical_scroll_only=True, expand_x=True, expand_y=True, size_subsample_height=1, sbar_relief="RELIEF_FLAT", key="columnaDescargadas")],
                                     [gui.Column([[gui.Text("No descargados:", font=(self.TIPOGRAFIA_3, self.TAMANO_TEXTO_SIMPLE), text_color="red", key="contadorNoDescargadas")]], background_color="#24262C", scrollable=True, vertical_scroll_only=True, expand_x=True, size=(None, 100), size_subsample_height=1, sbar_relief="RELIEF_FLAT", key="columnaNoDescargadas")]]
+        self.Musify_YouTube = Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga)
 
     def anadirDescargado(self, descargado=str):
         self.descargados.append(descargado)
@@ -58,7 +59,7 @@ class InterfazGrafica:
             time.sleep(0.7)
             self.descargados = MusifyTools().leerJson(self.RUTA_USUARIO)["Descargados"]
             self.noDescargados = MusifyTools().leerJson(self.RUTA_USUARIO)["NoDescargados"]
-            self.descargasTotales = Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).obtenerDescargasTotales()
+            self.descargasTotales = self.Musify_YouTube.obtenerDescargasTotales()
 
             for descargado in self.descargados:
                 if descargado in self.descargadosMostrados:
@@ -79,7 +80,7 @@ class InterfazGrafica:
                     pass
                 else:
                     self.noDescargadosMostrados.append(descargado)
-                    self.descargasTotales = Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).obtenerDescargasTotales()
+                    self.descargasTotales = self.Musify_YouTube.obtenerDescargasTotales()
                     self.cantidadNoDescargados = len(self.cantidadNoDescargados)
                     contadorNoDescargado = f"No descargados: {self.cantidadNoDescargados}/{self.descargasTotales}"
 
@@ -109,7 +110,8 @@ class InterfazGrafica:
             self.ventana["mostrarError"].Update(MusifyTools().obtenerError(self.urlDescarga, self.rutaDescarga, self.tipoDescarga))
 
             if self.ventana["mostrarError"].get() == "":
-                Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).iniciarDescarga()
+                self.Musify_YouTube = Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga)
+                self.Musify_YouTube.iniciarDescarga()
                 #Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).descargar()
                 hiloActualizador = threading.Thread(name="hiloActualizador", target=self.actualizarListaDescargas)
                 hiloActualizador.daemon = True

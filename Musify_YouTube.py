@@ -83,7 +83,6 @@ class Musify_YouTube:
                 MusifyTools().actualizarJson(self.RUTA_USUARIO, "", nombre)
 
     def obtenerDescargasTotales(self):
-        print(self.cantidadDescargasTotales)
         return self.cantidadDescargasTotales
 
     def iniciarDescarga(self):
