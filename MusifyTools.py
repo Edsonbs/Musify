@@ -1,9 +1,8 @@
-import platform, os, requests, re
+import platform, os, requests, re, json
 from moviepy.editor import *
 from mutagen.mp3 import MP3
 from mutagen.id3 import APIC
 from mutagen.easyid3 import EasyID3
-import eyed3
 
 class MusifyTools:
     def __init__(self):
@@ -144,3 +143,28 @@ class MusifyTools:
 
         # Eliminaremos la foto que he descargado para asignarla como metadatos.
         os.remove(imagen)
+
+    def crearJson(self, ruta=str):
+        archivoJson = "MusifyData.json"
+        datosJson = {"Descargados": [], "NoDescargados": []}
+        with open(archivoJson, "w") as archivo:
+            json.dump(datosJson, archivo)
+
+    def actualizarJson(self, ruta=str, descargadoAnadir=str, noDescargadoAnadir=str):
+        archivoJson = "MusifyData.json"
+        with open(archivoJson, "r") as archivo:
+            jsonData = json.load(archivo)
+
+        if descargadoAnadir != "":
+            jsonData["Descargados"].append(descargadoAnadir)
+        if noDescargadoAnadir != "":
+            jsonData["NoDescargados"].append(noDescargadoAnadir)
+
+        with open(archivoJson, "w") as archivo:
+            json.dump(jsonData, archivo)
+
+    def leerJson(self, ruta=str):
+        archivoJson = "MusifyData.json"
+        with open(archivoJson, "r") as archivo:
+            jsonData = json.load(archivo)
+            return jsonData

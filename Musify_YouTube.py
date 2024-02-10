@@ -1,7 +1,6 @@
 import pytube, re, os, threading
 from MusifyTools import MusifyTools
 from pytube.exceptions import AgeRestrictedError
-from Contenido import ContenidoDescargado
 
 class Musify_YouTube:
     def __init__(self, url=str, rutaDescarga=str, elementoDescarga=str):
@@ -25,7 +24,7 @@ class Musify_YouTube:
         MSG_VIDEO = "VIDEO"
         MSG_AUDIO = "AUDIO"
         RUTA_DESCARGA = self.rutaDescarga
-        RUTA_USUARIO = MusifyTools().obtenerDirectorioUsuario()
+        self.RUTA_USUARIO = MusifyTools().obtenerDirectorioUsuario()
 
         paraDescargar = []
 
@@ -52,7 +51,7 @@ class Musify_YouTube:
 
                 nombre = MusifyTools().soloCaracteresPermitidosEnNombreDeArchivoDelSistema(f"{TITULO} - {AUTOR}.mp4")
 
-                if os.path.exists(nombre): # En caso de que ya se encuentre un archivo con este nombre, no se procesará éste.
+                if os.path.exists(self.rutaDescarga+"\\"+nombre): # En caso de que ya se encuentre un archivo con este nombre, no se procesará éste.
                     return
 
                 if self.elementoDescarga == MSG_VIDEO: # Comprobamos si se desea descargar video.
@@ -61,18 +60,18 @@ class Musify_YouTube:
 
                 elif self.elementoDescarga == MSG_AUDIO:
                     descargable = VIDEO.streams.get_audio_only() # Obtenemos únicamente el audio.
-                    descargable.download(output_path=RUTA_USUARIO, filename=nombre)
+                    descargable.download(output_path=self.RUTA_USUARIO, filename=nombre)
 
                     # Ahora convertiremos el archivo de video en audio.
                     nuevoNombre = nombre.replace("mp4", "mp3") # Cambiamos el formato de MP4 a MP3.
                     RUTA_CON_ARCHIVO = RUTA_DESCARGA+"\\"+nuevoNombre # Ubicación en donde estará el archivo que el usuario quiere descargar.
-                    RUTA_USUARIO_CON_ARCHIVO = RUTA_USUARIO+"\\"+nombre # Ubicación de la carpeta usuario y el archivo que descargamos antes de convertirlo.
+                    RUTA_USUARIO_CON_ARCHIVO = self.RUTA_USUARIO+"\\"+nombre # Ubicación de la carpeta usuario y el archivo que descargamos antes de convertirlo.
 
                     MusifyTools().convertirArchivo(RUTA_USUARIO_CON_ARCHIVO, RUTA_CON_ARCHIVO)
                     MusifyTools().editarMetadatoMP3(RUTA_CON_ARCHIVO, AUTOR, PORTADA, ANO_PUBLICACION)
                     nombre = nuevoNombre # Para cuando lo añadamos a los descargados.
 
-                ContenidoDescargado().anadirDescargado(nombre) # Para que en la GUI aparezca que se ha descargado este elemento.
+                MusifyTools().actualizarJson(self.RUTA_USUARIO, nombre, "") # Para que en la GUI aparezca que se ha descargado este elemento.
             except AgeRestrictedError or Exception:
                 VIDEO = pytube.YouTube(videoDescargable)
                 AUTOR = (VIDEO.author) # Nos devuelve el nombre del canal que ha subido ese video.
@@ -81,7 +80,10 @@ class Musify_YouTube:
                 if self.elementoDescarga == MSG_AUDIO:
                     nombre = nombre.replace("mp4", "mp3")
 
-                ContenidoDescargado().anadirNoDescargado(nombre)
+                MusifyTools().actualizarJson(self.RUTA_USUARIO, "", nombre)
+
+    def obtenerDescargasTotales(self):
+        return self.cantidadDescargasTotales
 
     def iniciarDescarga(self):
         hiloDescarga = threading.Thread(name="Hilo Descarga", target=self.descargar)

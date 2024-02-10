@@ -2,7 +2,6 @@ import screeninfo, time, threading
 import PySimpleGUI as gui
 from Musify_YouTube import Musify_YouTube
 from MusifyTools import MusifyTools
-from Contenido import ContenidoDescargado
 
 class InterfazGrafica:
     def __init__(self):
@@ -16,9 +15,11 @@ class InterfazGrafica:
         self.TAMANO_TITULO, self.TAMANO_TITULO2, self.TAMANO_INPUT, self.TAMANO_TEXTO_SIMPLE, self.TAMANO_TEXTO_MINI = 34, 18, 15, 12, 8
         self.RESOLUCION_X = int(round(self.MONITOR_X/2, 0))
         self.RESOLUCION_Y = int(round(self.MONITOR_Y/1.7, 0))
+        self.RUTA_USUARIO = MusifyTools().obtenerDirectorioUsuario()
 
         # Variables
         gui.theme("Dark Grey 13")
+        MusifyTools().crearJson(MusifyTools().obtenerDirectorioUsuario())
         self.urlDescarga = "Reemplaza este texto por un link"
         self.rutaDescarga = MusifyTools().obtenerDirectorioEscritorio()
         self.tipoDescarga = self.OPCIONES_DESCARGA[0]
@@ -31,13 +32,14 @@ class InterfazGrafica:
         self.cantidadDescargadas = 0
         self.descargasTotales = 0
         self.cantidadNoDescargados = 0
+        self.programaCerrado = False
         self.elementosInterfaz = [  [gui.Text("")],
                                     [gui.Text("Musify", text_color="white", font=f"{self.TIPOGRAFIA_1} {self.TAMANO_TITULO}", justification="center", size=(self.MONITOR_X, 3))],
                                     [gui.Text("Link de descarga", text_color="white", font=f"{self.TIPOGRAFIA_2} {self.TAMANO_TITULO2}")],
                                     [gui.InputText(f"{self.urlDescarga}", text_color="#BBB1E7", font=f"{self.TIPOGRAFIA_3} {self.TAMANO_INPUT}", expand_x=True, key="urlDescarga")],
                                     [gui.Text("", text_color=f"{self.plataformaDetectada[1]}", font=f"{self.TIPOGRAFIA_2} {self.TAMANO_TEXTO_SIMPLE}", key="plataformaDetectada")],
                                     [gui.Text("")],
-                                    [gui.Text("Ubicación de descarga", text_color="white", font=f"{self.TIPOGRAFIA_2} {self.TAMANO_TITULO2}")],
+                                    [gui.Text("Ubicacion de descarga", text_color="white", font=f"{self.TIPOGRAFIA_2} {self.TAMANO_TITULO2}")],
                                     [gui.InputText(f"{self.rutaDescarga}", text_color="#BBB1E7", font=f"{self.TIPOGRAFIA_3} {self.TAMANO_INPUT}", expand_x=True, key="rutaDescarga")],
                                     [gui.FolderBrowse("Buscar ruta", font=f"{self.TIPOGRAFIA_3} {self.TAMANO_INPUT}", target="rutaDescarga"), gui.InputCombo(self.OPCIONES_DESCARGA, default_value=self.OPCIONES_DESCARGA[0], font=f"{self.TIPOGRAFIA_3} {self.TAMANO_INPUT}", key="tipoDescarga"), gui.Checkbox("Filtrado de nombres", True, font=f"{self.TIPOGRAFIA_3} {self.TAMANO_INPUT}", key="filtrarNombres", tooltip="Esta función se encarga de eliminar de los nombres de los archivos textos como '[Official Video]', o 'Videoclip Oficial'.")],
                                     [gui.Button("Descargar", font=f"{self.TIPOGRAFIA_3} {self.TAMANO_INPUT}", expand_x=True, key="botonDescargar")],
@@ -51,31 +53,12 @@ class InterfazGrafica:
 
     def anadirNoDescargado(self, noDescargado=str):
         self.noDescargados.append(noDescargado)
-
-    def iniciarVentana(self):
-        self.ventana = gui.Window("Musify", layout=self.elementosInterfaz, size=(self.RESOLUCION_X, self.RESOLUCION_Y), resizable=True, icon="Musify_Logo.ico")
-        while True:
-            evento, contenidoGUI = self.ventana.read()
-            if evento == gui.WIN_CLOSED:
-                break
-
-            # Aquí va el código
-
-            self.urlDescarga = contenidoGUI["urlDescarga"]
-            self.rutaDescarga = contenidoGUI["rutaDescarga"]
-            self.tipoDescarga = contenidoGUI["tipoDescarga"]
-            self.filtrarNombres = contenidoGUI["filtrarNombres"]
-            self.plataformaDetectada = MusifyTools().obtenerPlataforma(self.urlDescarga)
-
-            self.ventana["plataformaDetectada"].Update(self.plataformaDetectada[0])
-            self.ventana["mostrarError"].Update(MusifyTools().obtenerError(self.urlDescarga, self.rutaDescarga, self.tipoDescarga))
-
-            if self.ventana["mostrarError"].get() == "":
-                Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).iniciarDescarga()
-                #Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).descargar()
-
-            self.descargados = ContenidoDescargado().obtenerDescargadas()
-            self.noDescargados = ContenidoDescargado().obtenerNoDescargadas()
+    
+    def actualizarListaDescargas(self):
+        while self.programaCerrado == False:
+            time.sleep(0.75)
+            self.descargados = MusifyTools().leerJson(self.RUTA_USUARIO)["Descargados"]
+            self.noDescargados = MusifyTools().leerJson(self.RUTA_USUARIO)["NoDescargados"]
 
             for descargado in self.descargados:
                 if descargado in self.descargadosMostrados:
@@ -88,7 +71,7 @@ class InterfazGrafica:
 
                     # Ahora actualizaremos la GUI con la nueva descarga realizada.
                     nuevaFila = [[gui.Text(descargado, font=(self.TIPOGRAFIA_3, self.TAMANO_TEXTO_MINI))]]
-                    self.ventana.extend_layout(self.ventana["columnaDescargas"], nuevaFila)
+                    self.ventana.extend_layout(self.ventana["columnaDescargadas"], nuevaFila)
                     self.ventana["contadorDescargadas"].Update(contadorDescargas)
                     self.ventana["columnaDescargadas"].contents_changed()
 
@@ -107,7 +90,32 @@ class InterfazGrafica:
                     self.ventana["contadorNoDescargadas"].Update(contadorDescargas)
                     self.ventana["columnaNoDescargadas"].contents_changed()
 
-            print(evento)
+
+    def iniciarVentana(self):
+        self.ventana = gui.Window("Musify", layout=self.elementosInterfaz, size=(self.RESOLUCION_X, self.RESOLUCION_Y), resizable=True, icon="Musify_Logo.ico")
+        while True:
+            evento, contenidoGUI = self.ventana.read()
+            if evento == gui.WIN_CLOSED:
+                self.programaCerrado = True
+                break
+
+            # Aquí va el código
+
+            self.urlDescarga = contenidoGUI["urlDescarga"]
+            self.rutaDescarga = contenidoGUI["rutaDescarga"]
+            self.tipoDescarga = contenidoGUI["tipoDescarga"]
+            self.filtrarNombres = contenidoGUI["filtrarNombres"]
+            self.plataformaDetectada = MusifyTools().obtenerPlataforma(self.urlDescarga)
+
+            self.ventana["plataformaDetectada"].Update(self.plataformaDetectada[0])
+            self.ventana["mostrarError"].Update(MusifyTools().obtenerError(self.urlDescarga, self.rutaDescarga, self.tipoDescarga))
+
+            if self.ventana["mostrarError"].get() == "":
+                Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).iniciarDescarga()
+                #Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).descargar()
+                hiloActualizador = threading.Thread(name="hiloActualizador", target=self.actualizarListaDescargas)
+                hiloActualizador.start()
+
             print(contenidoGUI)
 
         self.ventana.close()
