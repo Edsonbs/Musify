@@ -147,12 +147,12 @@ class MusifyTools:
     def crearJson(self, ruta=str):
         archivoJson = "MusifyData.json"
         datosJson = {"Descargados": [], "NoDescargados": []}
-        with open(archivoJson, "w") as archivo:
+        with open(ruta+"\\"+archivoJson, "w") as archivo:
             json.dump(datosJson, archivo)
 
     def actualizarJson(self, ruta=str, descargadoAnadir=str, noDescargadoAnadir=str):
         archivoJson = "MusifyData.json"
-        with open(archivoJson, "r") as archivo:
+        with open(ruta+"\\"+archivoJson, "r") as archivo:
             jsonData = json.load(archivo)
 
         if descargadoAnadir != "":
@@ -160,11 +160,11 @@ class MusifyTools:
         if noDescargadoAnadir != "":
             jsonData["NoDescargados"].append(noDescargadoAnadir)
 
-        with open(archivoJson, "w") as archivo:
+        with open(ruta+"\\"+archivoJson, "w") as archivo:
             json.dump(jsonData, archivo)
 
     def leerJson(self, ruta=str):
         archivoJson = "MusifyData.json"
-        with open(archivoJson, "r") as archivo:
+        with open(ruta+"\\"+archivoJson, "r") as archivo:
             jsonData = json.load(archivo)
             return jsonData

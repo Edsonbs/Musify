@@ -32,7 +32,6 @@ class InterfazGrafica:
         self.cantidadDescargadas = 0
         self.descargasTotales = 0
         self.cantidadNoDescargados = 0
-        self.programaCerrado = False
         self.elementosInterfaz = [  [gui.Text("")],
                                     [gui.Text("Musify", text_color="white", font=f"{self.TIPOGRAFIA_1} {self.TAMANO_TITULO}", justification="center", size=(self.MONITOR_X, 3))],
                                     [gui.Text("Link de descarga", text_color="white", font=f"{self.TIPOGRAFIA_2} {self.TAMANO_TITULO2}")],
@@ -55,17 +54,17 @@ class InterfazGrafica:
         self.noDescargados.append(noDescargado)
     
     def actualizarListaDescargas(self):
-        while self.programaCerrado == False:
-            time.sleep(0.75)
+        while True:
+            time.sleep(0.7)
             self.descargados = MusifyTools().leerJson(self.RUTA_USUARIO)["Descargados"]
             self.noDescargados = MusifyTools().leerJson(self.RUTA_USUARIO)["NoDescargados"]
+            self.descargasTotales = Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).obtenerDescargasTotales()
 
             for descargado in self.descargados:
                 if descargado in self.descargadosMostrados:
                     pass
                 else:
                     self.descargadosMostrados.append(descargado)
-                    self.descargasTotales = Musify_YouTube().obtenerDescargasTotales()
                     self.cantidadDescargadas = len(self.descargados)
                     contadorDescargas = f"Descargas: {self.cantidadDescargadas}/{self.descargasTotales}"
 
@@ -80,7 +79,7 @@ class InterfazGrafica:
                     pass
                 else:
                     self.noDescargadosMostrados.append(descargado)
-                    self.descargasTotales = Musify_YouTube().obtenerDescargasTotales()
+                    self.descargasTotales = Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).obtenerDescargasTotales()
                     self.cantidadNoDescargados = len(self.cantidadNoDescargados)
                     contadorNoDescargado = f"No descargados: {self.cantidadNoDescargados}/{self.descargasTotales}"
 
@@ -96,7 +95,6 @@ class InterfazGrafica:
         while True:
             evento, contenidoGUI = self.ventana.read()
             if evento == gui.WIN_CLOSED:
-                self.programaCerrado = True
                 break
 
             # Aquí va el código
@@ -114,6 +112,7 @@ class InterfazGrafica:
                 Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).iniciarDescarga()
                 #Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).descargar()
                 hiloActualizador = threading.Thread(name="hiloActualizador", target=self.actualizarListaDescargas)
+                hiloActualizador.daemon = True
                 hiloActualizador.start()
 
             print(contenidoGUI)
