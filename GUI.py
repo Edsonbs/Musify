@@ -81,7 +81,7 @@ class InterfazGrafica:
                 else:
                     self.noDescargadosMostrados.append(descargado)
                     self.descargasTotales = self.Musify_YouTube.obtenerDescargasTotales()
-                    self.cantidadNoDescargados = len(self.cantidadNoDescargados)
+                    self.cantidadNoDescargados = len(self.noDescargados)
                     contadorNoDescargado = f"No descargados: {self.cantidadNoDescargados}/{self.descargasTotales}"
 
                     # Ahora actualizaremos la GUI con las no descargadas.
