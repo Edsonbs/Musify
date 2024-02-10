@@ -1,4 +1,4 @@
-import pytube, re, os
+import pytube, re, os, threading
 from MusifyTools import MusifyTools
 from pytube.exceptions import AgeRestrictedError
 from Contenido import ContenidoDescargado
@@ -82,3 +82,7 @@ class Musify_YouTube:
                     nombre = nombre.replace("mp4", "mp3")
 
                 ContenidoDescargado().anadirNoDescargado(nombre)
+
+    def iniciarDescarga(self):
+        hiloDescarga = threading.Thread(name="Hilo Descarga", target=self.descargar)
+        hiloDescarga.start()

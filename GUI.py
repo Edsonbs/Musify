@@ -13,7 +13,8 @@ class InterfazGrafica:
         self.MONITOR_X = screeninfo.get_monitors()[0].width # Ancho actual del monitor principal
         self.MONITOR_Y = monitor_y = screeninfo.get_monitors()[0].height # Alto del monitor principal
         self.TIPOGRAFIA_1, self.TIPOGRAFIA_2, self.TIPOGRAFIA_3 = "Terminal", "Minecraft", "Courier" # Otra opción como fuente 3 sería "Pixellari".
-        self.RESOLUCION_X = int(round(self.MONITOR_X/1.7, 0))
+        self.TAMANO_TITULO, self.TAMANO_TITULO2, self.TAMANO_INPUT, self.TAMANO_TEXTO_SIMPLE, self.TAMANO_TEXTO_MINI = 34, 18, 15, 12, 8
+        self.RESOLUCION_X = int(round(self.MONITOR_X/2, 0))
         self.RESOLUCION_Y = int(round(self.MONITOR_Y/1.7, 0))
 
         # Variables
@@ -31,19 +32,19 @@ class InterfazGrafica:
         self.descargasTotales = 0
         self.cantidadNoDescargados = 0
         self.elementosInterfaz = [  [gui.Text("")],
-                                    [gui.Text("Musify", text_color="white", font=f"{self.TIPOGRAFIA_1} 32", justification="center", size=(self.MONITOR_X, 3))],
-                                    [gui.Text("Link de descarga", text_color="white", font=f"{self.TIPOGRAFIA_2}")],
-                                    [gui.InputText(f"{self.urlDescarga}", text_color="#BBB1E7", font=f"{self.TIPOGRAFIA_3}", expand_x=True, key="urlDescarga")],
-                                    [gui.Text("", text_color=f"{self.plataformaDetectada[1]}", font=f"{self.TIPOGRAFIA_2}", key="plataformaDetectada")],
+                                    [gui.Text("Musify", text_color="white", font=f"{self.TIPOGRAFIA_1} {self.TAMANO_TITULO}", justification="center", size=(self.MONITOR_X, 3))],
+                                    [gui.Text("Link de descarga", text_color="white", font=f"{self.TIPOGRAFIA_2} {self.TAMANO_TITULO2}")],
+                                    [gui.InputText(f"{self.urlDescarga}", text_color="#BBB1E7", font=f"{self.TIPOGRAFIA_3} {self.TAMANO_INPUT}", expand_x=True, key="urlDescarga")],
+                                    [gui.Text("", text_color=f"{self.plataformaDetectada[1]}", font=f"{self.TIPOGRAFIA_2} {self.TAMANO_TEXTO_SIMPLE}", key="plataformaDetectada")],
                                     [gui.Text("")],
-                                    [gui.Text("Ubicación de descarga", text_color="white", font=f"{self.TIPOGRAFIA_2}")],
-                                    [gui.InputText(f"{self.rutaDescarga}", text_color="#BBB1E7", font=f"{self.TIPOGRAFIA_3}", expand_x=True, key="rutaDescarga")],
-                                    [gui.FolderBrowse("Buscar ruta", font=f"{self.TIPOGRAFIA_3}", target="rutaDescarga"), gui.InputCombo(self.OPCIONES_DESCARGA, default_value=self.OPCIONES_DESCARGA[0], font=f"{self.TIPOGRAFIA_3}", key="tipoDescarga"), gui.Checkbox("Filtrado de nombres", True, font=f"{self.TIPOGRAFIA_3}", key="filtrarNombres", tooltip="Esta función se encarga de eliminar de los nombres de los archivos textos como '[Official Video]', o 'Videoclip Oficial'.")],
-                                    [gui.Button("Descargar", font=f"{self.TIPOGRAFIA_3}", expand_x=True, key="botonDescargar")],
-                                    [gui.Text(f"Made by Eddyson {self.VERSION}", text_color="white", font=f"{self.TIPOGRAFIA_2}")],
-                                    [gui.Text("", text_color="red", font=f"{self.TIPOGRAFIA_2}", key="mostrarError", justification="center", size=(500, 1))],
-                                    [gui.Column([[gui.Text("Descargadas:", font=(self.TIPOGRAFIA_3, 12), text_color="white", key="contadorDescargadas")]], background_color="#24262C", scrollable=True, vertical_scroll_only=True, expand_x=True, expand_y=True, size_subsample_height=1, sbar_relief="RELIEF_FLAT", key="columnaDescargadas")],
-                                    [gui.Column([[gui.Text("No descargados:", font=(self.TIPOGRAFIA_3, 12), text_color="red", key="contadorNoDescargadas")]], background_color="#24262C", scrollable=True, vertical_scroll_only=True, expand_x=True, size=(None, 100), size_subsample_height=1, sbar_relief="RELIEF_FLAT", key="columnaNoDescargadas")]]
+                                    [gui.Text("Ubicación de descarga", text_color="white", font=f"{self.TIPOGRAFIA_2} {self.TAMANO_TITULO2}")],
+                                    [gui.InputText(f"{self.rutaDescarga}", text_color="#BBB1E7", font=f"{self.TIPOGRAFIA_3} {self.TAMANO_INPUT}", expand_x=True, key="rutaDescarga")],
+                                    [gui.FolderBrowse("Buscar ruta", font=f"{self.TIPOGRAFIA_3} {self.TAMANO_INPUT}", target="rutaDescarga"), gui.InputCombo(self.OPCIONES_DESCARGA, default_value=self.OPCIONES_DESCARGA[0], font=f"{self.TIPOGRAFIA_3} {self.TAMANO_INPUT}", key="tipoDescarga"), gui.Checkbox("Filtrado de nombres", True, font=f"{self.TIPOGRAFIA_3} {self.TAMANO_INPUT}", key="filtrarNombres", tooltip="Esta función se encarga de eliminar de los nombres de los archivos textos como '[Official Video]', o 'Videoclip Oficial'.")],
+                                    [gui.Button("Descargar", font=f"{self.TIPOGRAFIA_3} {self.TAMANO_INPUT}", expand_x=True, key="botonDescargar")],
+                                    [gui.Text(f"Made by Eddyson {self.VERSION}", text_color="white", font=f"{self.TIPOGRAFIA_2} {self.TAMANO_TEXTO_SIMPLE}")],
+                                    [gui.Text("", text_color="red", font=f"{self.TIPOGRAFIA_2} {self.TAMANO_TEXTO_SIMPLE}", key="mostrarError", justification="center", size=(500, 1))],
+                                    [gui.Column([[gui.Text("Descargadas:", font=(self.TIPOGRAFIA_3, self.TAMANO_TEXTO_SIMPLE), text_color="white", key="contadorDescargadas")]], background_color="#24262C", scrollable=True, vertical_scroll_only=True, expand_x=True, expand_y=True, size_subsample_height=1, sbar_relief="RELIEF_FLAT", key="columnaDescargadas")],
+                                    [gui.Column([[gui.Text("No descargados:", font=(self.TIPOGRAFIA_3, self.TAMANO_TEXTO_SIMPLE), text_color="red", key="contadorNoDescargadas")]], background_color="#24262C", scrollable=True, vertical_scroll_only=True, expand_x=True, size=(None, 100), size_subsample_height=1, sbar_relief="RELIEF_FLAT", key="columnaNoDescargadas")]]
 
     def anadirDescargado(self, descargado=str):
         self.descargados.append(descargado)
@@ -70,8 +71,9 @@ class InterfazGrafica:
             self.ventana["mostrarError"].Update(MusifyTools().obtenerError(self.urlDescarga, self.rutaDescarga, self.tipoDescarga))
 
             if self.ventana["mostrarError"].get() == "":
-                Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).descargar()
-            
+                Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).iniciarDescarga()
+                #Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).descargar()
+
             self.descargados = ContenidoDescargado().obtenerDescargadas()
             self.noDescargados = ContenidoDescargado().obtenerNoDescargadas()
 
@@ -85,7 +87,7 @@ class InterfazGrafica:
                     contadorDescargas = f"Descargas: {self.cantidadDescargadas}/{self.descargasTotales}"
 
                     # Ahora actualizaremos la GUI con la nueva descarga realizada.
-                    nuevaFila = [[gui.Text(descargado, font=(self.TIPOGRAFIA_3, 8))]]
+                    nuevaFila = [[gui.Text(descargado, font=(self.TIPOGRAFIA_3, self.TAMANO_TEXTO_MINI))]]
                     self.ventana.extend_layout(self.ventana["columnaDescargas"], nuevaFila)
                     self.ventana["contadorDescargadas"].Update(contadorDescargas)
                     self.ventana["columnaDescargadas"].contents_changed()
@@ -100,7 +102,7 @@ class InterfazGrafica:
                     contadorNoDescargado = f"No descargados: {self.cantidadNoDescargados}/{self.descargasTotales}"
 
                     # Ahora actualizaremos la GUI con las no descargadas.
-                    nuevaFila = [[gui.Text(noDescargado, font=(self.TIPOGRAFIA_3, 8), text_color="red")]]
+                    nuevaFila = [[gui.Text(noDescargado, font=(self.TIPOGRAFIA_3, self.TAMANO_TEXTO_MINI), text_color="red")]]
                     self.ventana.extend_layout(self.ventana["columnaNoDescargadas"], nuevaFila)
                     self.ventana["contadorNoDescargadas"].Update(contadorDescargas)
                     self.ventana["columnaNoDescargadas"].contents_changed()
