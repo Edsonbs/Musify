@@ -38,8 +38,7 @@ class Musify_YouTube:
             paraDescargar.append(self.url)
 
         if self.url not in self.linksDescargados:
-            #self.cantidadDescargasTotales += len(paraDescargar)
-            todasLasDescargas += len(paraDescargar)
+            self.cantidadDescargasTotales += len(paraDescargar)
             self.linksDescargados.append(self.url)
 
         for videoDescargable in paraDescargar:
