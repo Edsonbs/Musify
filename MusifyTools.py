@@ -92,7 +92,7 @@ class MusifyTools:
         elif patronTwitch != None and patronTwitch.group() == "twitch.tv":
             return "Twitch", "#BB68DF"
         else:
-            return "Plataforma", "#F09C20"
+            return "Plataforma no detectada", "#F09C20"
 
     def obtenerError(self, url=str, ruta=str, tipoDescarga=str):
         error = ""
@@ -143,6 +143,10 @@ class MusifyTools:
 
         # Eliminaremos la foto que he descargado para asignarla como metadatos.
         os.remove(imagen)
+    
+    def editarMetadatoMP4(self, rutaYNombreArchivo="", autor=None, portada=None, anoPublicacion=None):
+        # AÚN POR IMPLEMENTAR
+        pass
 
     def crearJson(self, ruta=str):
         archivoJson = "MusifyData.json"

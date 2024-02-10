@@ -3,11 +3,13 @@ from MusifyTools import MusifyTools
 from pytube.exceptions import AgeRestrictedError
 
 class Musify_YouTube:
-    def __init__(self, url=str, rutaDescarga=str, elementoDescarga=str):
+    def __init__(self, url=str, rutaDescarga=str, elementoDescarga=str, simplificarNombre=bool):
         self.url = url
         self.rutaDescarga = rutaDescarga
         self.elementoDescarga = str(str(elementoDescarga).upper())
+        self.simplificarNombre = simplificarNombre
         self.cantidadDescargasTotales = 0
+        self.linksDescargados = []
 
     def esPlaylist(self):
         match1 = re.search(r'\bplaylist\b', self.url)
@@ -35,7 +37,10 @@ class Musify_YouTube:
         elif self.esPlaylist() == False:
             paraDescargar.append(self.url)
 
-        self.cantidadDescargasTotales = len(paraDescargar)
+        if self.url not in self.linksDescargados:
+            #self.cantidadDescargasTotales += len(paraDescargar)
+            todasLasDescargas += len(paraDescargar)
+            self.linksDescargados.append(self.url)
 
         for videoDescargable in paraDescargar:
             try:
@@ -50,9 +55,13 @@ class Musify_YouTube:
                 ANO_PUBLICACION = str(FECHA_PUBLICACION)[0:4] # Sólo el año de publicación del video en String.
 
                 nombre = MusifyTools().soloCaracteresPermitidosEnNombreDeArchivoDelSistema(f"{TITULO} - {AUTOR}.mp4")
+                if self.simplificarNombre == True:
+                    nombre = MusifyTools().simplificarNombreArchivo(nombre)
 
                 if os.path.exists(self.rutaDescarga+"\\"+nombre): # En caso de que ya se encuentre un archivo con este nombre, no se procesará éste.
                     return
+
+                self.linksDescargados.append(videoDescargable)
 
                 if self.elementoDescarga == MSG_VIDEO: # Comprobamos si se desea descargar video.
                     descargable = VIDEO.streams.get_highest_resolution() # Obtenemos la mejor resolución disponible.
@@ -77,10 +86,13 @@ class Musify_YouTube:
                 AUTOR = (VIDEO.author) # Nos devuelve el nombre del canal que ha subido ese video.
                 TITULO = (VIDEO.title) # Nos entrega el título del video.
                 nombre = str(MusifyTools().soloCaracteresPermitidosEnNombreDeArchivoDelSistema(f"{TITULO} - {AUTOR}.mp4"))
+                if self.simplificarNombre == True:
+                    nombre = MusifyTools().simplificarNombreArchivo(nombre)
                 if self.elementoDescarga == MSG_AUDIO:
                     nombre = nombre.replace("mp4", "mp3")
 
                 MusifyTools().actualizarJson(self.RUTA_USUARIO, "", nombre)
+        paraDescargar = []
 
     def obtenerDescargasTotales(self):
         return self.cantidadDescargasTotales
