@@ -54,7 +54,7 @@ class InterfazGrafica:
 
     def anadirNoDescargado(self, noDescargado=str):
         self.noDescargados.append(noDescargado)
-    
+
     def actualizarListaDescargas(self):
         while True:
             time.sleep(0.80)
@@ -81,17 +81,15 @@ class InterfazGrafica:
                 if noDescargado in self.noDescargadosMostrados:
                     pass
                 else:
-                    self.noDescargadosMostrados.append(descargado)
-                    self.descargasTotales = self.Musify_YouTube.obtenerDescargasTotales()
+                    self.noDescargadosMostrados.append(noDescargado)
                     self.cantidadNoDescargados = len(self.noDescargados)
                     contadorNoDescargado = f"No descargados: {self.cantidadNoDescargados}/{self.descargasTotales}"
 
                     # Ahora actualizaremos la GUI con las no descargadas.
                     nuevaFila = [[gui.Text(noDescargado, font=(self.TIPOGRAFIA_3, self.TAMANO_TEXTO_MINI), text_color="red")]]
                     self.ventana.extend_layout(self.ventana["columnaNoDescargadas"], nuevaFila)
-                    self.ventana["contadorNoDescargadas"].Update(contadorDescargas)
+                    self.ventana["contadorNoDescargadas"].Update(contadorNoDescargado)
                     self.ventana["columnaNoDescargadas"].contents_changed()
-
 
     def iniciarVentana(self):
         self.ventana = gui.Window("Musify", layout=self.elementosInterfaz, size=(self.RESOLUCION_X, self.RESOLUCION_Y), resizable=True, icon="Musify_Logo.ico")
