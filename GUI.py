@@ -15,16 +15,17 @@ class InterfazGrafica:
         self.TAMANO_TITULO, self.TAMANO_TITULO2, self.TAMANO_INPUT, self.TAMANO_TEXTO_SIMPLE, self.TAMANO_TEXTO_MINI = 34, 18, 15, 12, 8
         self.RESOLUCION_X = int(round(self.MONITOR_X/2, 0))
         self.RESOLUCION_Y = int(round(self.MONITOR_Y/1.7, 0))
-        self.RUTA_USUARIO = MusifyTools().obtenerDirectorioUsuario()
+        self.MUSIFY_TOOLS = MusifyTools()
+        self.RUTA_USUARIO = self.MUSIFY_TOOLS.obtenerDirectorioUsuario()
 
         # Variables
         gui.theme("Dark Grey 13")
-        MusifyTools().crearJson(MusifyTools().obtenerDirectorioUsuario())
+        self.MUSIFY_TOOLS.crearJson(self.RUTA_USUARIO)
         self.urlDescarga = "Reemplaza este texto por un link"
-        self.rutaDescarga = MusifyTools().obtenerDirectorioEscritorio()
+        self.rutaDescarga = self.RUTA_USUARIO
         self.tipoDescarga = self.OPCIONES_DESCARGA[0]
         self.filtrarNombres = True
-        self.plataformaDetectada = MusifyTools().obtenerPlataforma(self.urlDescarga)
+        self.plataformaDetectada = self.MUSIFY_TOOLS.obtenerPlataforma(self.urlDescarga)
         self.descargados = []
         self.descargadosMostrados = []
         self.noDescargados = []
@@ -56,9 +57,10 @@ class InterfazGrafica:
     
     def actualizarListaDescargas(self):
         while True:
-            time.sleep(0.7)
-            self.descargados = MusifyTools().leerJson(self.RUTA_USUARIO)["Descargados"]
-            self.noDescargados = MusifyTools().leerJson(self.RUTA_USUARIO)["NoDescargados"]
+            time.sleep(0.80)
+            ficheroJson = self.MUSIFY_TOOLS.leerJson(self.RUTA_USUARIO)
+            self.descargados = ficheroJson["Descargados"]
+            self.noDescargados = ficheroJson["NoDescargados"]
             self.descargasTotales = self.Musify_YouTube.obtenerDescargasTotales()
 
             for descargado in self.descargados:
@@ -104,10 +106,10 @@ class InterfazGrafica:
             self.rutaDescarga = contenidoGUI["rutaDescarga"]
             self.tipoDescarga = contenidoGUI["tipoDescarga"]
             self.filtrarNombres = contenidoGUI["filtrarNombres"]
-            self.plataformaDetectada = MusifyTools().obtenerPlataforma(self.urlDescarga)
+            self.plataformaDetectada = self.MUSIFY_TOOLS.obtenerPlataforma(self.urlDescarga)
 
             self.ventana["plataformaDetectada"].Update(self.plataformaDetectada[0])
-            self.ventana["mostrarError"].Update(MusifyTools().obtenerError(self.urlDescarga, self.rutaDescarga, self.tipoDescarga))
+            self.ventana["mostrarError"].Update(self.MUSIFY_TOOLS.obtenerError(self.urlDescarga, self.rutaDescarga, self.tipoDescarga))
 
             if self.ventana["mostrarError"].get() == "":
                 self.Musify_YouTube = Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga, self.filtrarNombres)
@@ -116,7 +118,5 @@ class InterfazGrafica:
                 hiloActualizador = threading.Thread(name="hiloActualizador", target=self.actualizarListaDescargas)
                 hiloActualizador.daemon = True
                 hiloActualizador.start()
-
-            print(contenidoGUI)
 
         self.ventana.close()

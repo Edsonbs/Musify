@@ -114,7 +114,8 @@ class MusifyTools:
 
     # Cambia los metadatos de un archivo MP3.
     def editarMetadatoMP3(self, rutaYNombreArchivo="", autor=None, portada=None, anoPublicacion=None):
-        imagen = f"{os.path.expanduser('~')}\\portadaMusify.jpg"
+        nombreImagen = rutaYNombreArchivo.split("\\")[-1][:-4]
+        imagen = f"{os.path.expanduser('~')}\\{nombreImagen}.jpg"
 
         # Ahora descargaremos la imagen de portada.
         urlPortada = requests.get(portada)
@@ -156,8 +157,8 @@ class MusifyTools:
 
     def actualizarJson(self, ruta=str, descargadoAnadir=str, noDescargadoAnadir=str):
         archivoJson = "MusifyData.json"
-        with open(ruta+"\\"+archivoJson, "r") as archivo:
-            jsonData = json.load(archivo)
+        with open(ruta+"\\"+archivoJson, encoding="utf-8-sig", mode="r") as archivo:
+            jsonData = json.loads(archivo.read())
 
         if descargadoAnadir != "":
             jsonData["Descargados"].append(descargadoAnadir)
@@ -167,8 +168,22 @@ class MusifyTools:
         with open(ruta+"\\"+archivoJson, "w") as archivo:
             json.dump(jsonData, archivo)
 
+    def actualizarJsonListado(self, ruta=str, descargadoLista=list, noDescargadoLista=list):
+        archivoJson = "MusifyData.json"
+        jsonData = ""
+        with open(ruta+"\\"+archivoJson, encoding="utf-8-sig", mode="r") as archivo:
+            jsonData = json.loads(archivo.read())
+
+        if descargadoLista != "":
+            jsonData["Descargados"] = descargadoLista
+        if noDescargadoLista != "":
+            jsonData["NoDescargados"] = noDescargadoLista
+
+        with open(ruta+"\\"+archivoJson, "w") as archivo2:
+            json.dump(jsonData, archivo2)
+
     def leerJson(self, ruta=str):
         archivoJson = "MusifyData.json"
-        with open(ruta+"\\"+archivoJson, "r") as archivo:
-            jsonData = json.load(archivo)
-            return jsonData
+        with open(ruta+"\\"+archivoJson, encoding="utf-8-sig", mode="r") as archivo:
+            jsonData = json.loads(archivo.read())
+        return jsonData
