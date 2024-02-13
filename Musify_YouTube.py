@@ -88,7 +88,7 @@ class Musify_YouTube:
 
     def actualizarArchivoJson(self):
         while True:
-            time.sleep(0.7)
+            time.sleep(0.8)
             recorrerDescargados = [self.nombresCancionesDescargadas1, self.nombresCancionesDescargadas2, self.nombresCancionesDescargadas3, self.nombresCancionesDescargadas4, self.nombresCancionesDescargadas5]
 
             for listaDescargas in recorrerDescargados:
