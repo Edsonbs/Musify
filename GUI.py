@@ -20,11 +20,11 @@ class InterfazGrafica:
 
         # Variables
         gui.theme("Dark Grey 13")
-        self.MUSIFY_TOOLS.crearJson(self.RUTA_USUARIO)
         self.urlDescarga = "Reemplaza este texto por un link"
-        self.rutaDescarga = self.RUTA_USUARIO
+        self.rutaDescarga = self.MUSIFY_TOOLS.obtenerDirectorioEscritorio()
         self.tipoDescarga = self.OPCIONES_DESCARGA[0]
         self.filtrarNombres = True
+        self.jsonCreado = False
         self.plataformaDetectada = self.MUSIFY_TOOLS.obtenerPlataforma(self.urlDescarga)
         self.descargados = []
         self.descargadosMostrados = []
@@ -57,8 +57,8 @@ class InterfazGrafica:
 
     def actualizarListaDescargas(self):
         while True:
-            time.sleep(0.80)
-            ficheroJson = self.MUSIFY_TOOLS.leerJson(self.RUTA_USUARIO)
+            time.sleep(1)
+            ficheroJson = self.MUSIFY_TOOLS.leerJson()
             self.descargados = ficheroJson["Descargados"]
             self.noDescargados = ficheroJson["NoDescargados"]
             self.descargasTotales = self.Musify_YouTube.obtenerDescargasTotales()
@@ -100,6 +100,10 @@ class InterfazGrafica:
 
             # Aquí va el código
 
+            if self.jsonCreado == False:
+                self.MUSIFY_TOOLS.crearJson()
+                self.jsonCreado = True
+
             self.urlDescarga = contenidoGUI["urlDescarga"]
             self.rutaDescarga = contenidoGUI["rutaDescarga"]
             self.tipoDescarga = contenidoGUI["tipoDescarga"]
@@ -113,8 +117,8 @@ class InterfazGrafica:
                 self.Musify_YouTube = Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga, self.filtrarNombres)
                 self.Musify_YouTube.iniciarDescarga()
                 #Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga).descargar()
-                hiloActualizador = threading.Thread(name="hiloActualizador", target=self.actualizarListaDescargas)
-                hiloActualizador.daemon = True
-                hiloActualizador.start()
+                hiloActualizadorGUI = threading.Thread(name="hiloActualizadorGUI", target=self.actualizarListaDescargas)
+                hiloActualizadorGUI.daemon = True
+                hiloActualizadorGUI.start()
 
         self.ventana.close()

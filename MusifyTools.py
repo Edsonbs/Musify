@@ -115,7 +115,7 @@ class MusifyTools:
     # Cambia los metadatos de un archivo MP3.
     def editarMetadatoMP3(self, rutaYNombreArchivo="", autor=None, portada=None, anoPublicacion=None):
         nombreImagen = rutaYNombreArchivo.split("\\")[-1][:-4]
-        imagen = f"{os.path.expanduser('~')}\\{nombreImagen}.jpg"
+        imagen = f"{self.directorioHome}\\{nombreImagen}.jpg"
 
         # Ahora descargaremos la imagen de portada.
         urlPortada = requests.get(portada)
@@ -149,41 +149,26 @@ class MusifyTools:
         # AÚN POR IMPLEMENTAR
         pass
 
-    def crearJson(self, ruta=str):
-        archivoJson = "MusifyData.json"
+    def crearJson(self):
+        NOMBRE_JSON = "MusifyData.json"
         datosJson = {"Descargados": [], "NoDescargados": []}
-        with open(ruta+"\\"+archivoJson, "w") as archivo:
+        with open(self.directorioHome+"\\"+NOMBRE_JSON, "w") as archivo:
             json.dump(datosJson, archivo)
 
-    def actualizarJson(self, ruta=str, descargadoAnadir=str, noDescargadoAnadir=str):
-        archivoJson = "MusifyData.json"
-        with open(ruta+"\\"+archivoJson, encoding="utf-8-sig", mode="r") as archivo:
-            jsonData = json.loads(archivo.read())
+    def actualizarJson(self, descargadoAnadir=str, noDescargadoAnadir=str):
+        NOMBRE_JSON = "MusifyData.json"
+        jsonData = self.leerJson()
 
-        if descargadoAnadir != "":
+        if descargadoAnadir != "" and descargadoAnadir != None:
             jsonData["Descargados"].append(descargadoAnadir)
-        if noDescargadoAnadir != "":
+        if noDescargadoAnadir != "" and noDescargadoAnadir != None:
             jsonData["NoDescargados"].append(noDescargadoAnadir)
 
-        with open(ruta+"\\"+archivoJson, "w") as archivo:
+        with open(self.directorioHome+"\\"+NOMBRE_JSON, "w") as archivo:
             json.dump(jsonData, archivo)
 
-    def actualizarJsonListado(self, ruta=str, descargadoLista=list, noDescargadoLista=list):
-        archivoJson = "MusifyData.json"
-        jsonData = ""
-        with open(ruta+"\\"+archivoJson, encoding="utf-8-sig", mode="r") as archivo:
-            jsonData = json.loads(archivo.read())
-
-        if descargadoLista != "":
-            jsonData["Descargados"] = descargadoLista
-        if noDescargadoLista != "":
-            jsonData["NoDescargados"] = noDescargadoLista
-
-        with open(ruta+"\\"+archivoJson, "w") as archivo2:
-            json.dump(jsonData, archivo2)
-
-    def leerJson(self, ruta=str):
-        archivoJson = "MusifyData.json"
-        with open(ruta+"\\"+archivoJson, encoding="utf-8-sig", mode="r") as archivo:
-            jsonData = json.loads(archivo.read())
+    def leerJson(self):
+        NOMBRE_JSON = "MusifyData.json"
+        with open(self.directorioHome+"\\"+NOMBRE_JSON, "r") as archivo:
+            jsonData = json.load(archivo)
         return jsonData

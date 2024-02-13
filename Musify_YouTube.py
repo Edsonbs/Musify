@@ -4,14 +4,15 @@ from pytube.exceptions import AgeRestrictedError
 
 class Musify_YouTube:
     def __init__(self, url=str, rutaDescarga=str, elementoDescarga=str, simplificarNombre=bool):
-        self.url = url
-        self.rutaDescarga = rutaDescarga
-        self.elementoDescarga = str(str(elementoDescarga).upper())
-        self.simplificarNombre = simplificarNombre
-        self.cantidadDescargasTotales = 0
-        self.linksDescargados = []
         self.MUSIFY_TOOLS = MusifyTools()
         self.RUTA_USUARIO = self.MUSIFY_TOOLS.obtenerDirectorioUsuario()
+        self.RUTA_DESCARGA = rutaDescarga
+        self.URL_DESCARGAR = url
+        self.ELEMENTO_DESCARGAR = str(str(elementoDescarga).upper())
+        self.SIMPLIFICAR_NOMBRE = simplificarNombre
+
+        self.cantidadDescargasTotales = 0
+        self.linksDescargados = []
 
         self.nombresCancionesDescargadas1 = []
         self.nombresCancionesDescargadas2 = []
@@ -19,15 +20,11 @@ class Musify_YouTube:
         self.nombresCancionesDescargadas4 = []
         self.nombresCancionesDescargadas5 = []
 
-        self.todosDescargados = []
-
         self.nombresCancionesNoDescargadas1 = []
         self.nombresCancionesNoDescargadas2 = []
         self.nombresCancionesNoDescargadas3 = []
         self.nombresCancionesNoDescargadas4 = []
         self.nombresCancionesNoDescargadas5 = []
-
-        self.todosNoDescargados = []
 
         self.listaDescargar1 = []
         self.listaDescargar2 = []
@@ -38,9 +35,9 @@ class Musify_YouTube:
     def obtenerDescargasTotales(self):
         return self.cantidadDescargasTotales
 
-    def esPlaylist(self):
-        match1 = re.search(r'\bplaylist\b', self.url)
-        match2 = re.search(r'\blist\b', self.url)
+    def esPlaylist(self): 
+        match1 = re.search(r'\bplaylist\b', self.URL_DESCARGAR)
+        match2 = re.search(r'\blist\b', self.URL_DESCARGAR)
 
         if match1 != None and match1.group() == "playlist":
             return True
@@ -53,41 +50,40 @@ class Musify_YouTube:
         self.paraDescargar = []
 
         if self.esPlaylist() == True:
-            VIDEOS = pytube.Playlist(self.url) # Lista de los videos de YT.
+            VIDEOS = pytube.Playlist(self.URL_DESCARGAR) # Lista de los videos de YT.
             for urlDescarga in VIDEOS:
                 self.paraDescargar.append(urlDescarga)
         elif self.esPlaylist() == False:
-            self.paraDescargar.append(self.url)
+            self.paraDescargar.append(self.URL_DESCARGAR)
 
-        if self.url not in self.linksDescargados:
-            self.cantidadDescargasTotales += len(self.paraDescargar)
-            self.linksDescargados.append(self.url)
-        
+        if self.URL_DESCARGAR not in self.linksDescargados:
+            self.cantidadDescargasTotales = len(self.paraDescargar)
+            self.linksDescargados.append(self.URL_DESCARGAR)
+
         # Vamos a dividir la cola de descargas en varias para descargar en modo multithreading.
-        if len(self.paraDescargar) > 25:
+        if len(self.paraDescargar) >= 25:
             cantidadPorCola = int(round(len(self.paraDescargar) / 5))
             self.listaDescargar1 = self.paraDescargar[:cantidadPorCola] # El primer quinto de las canciones.
             self.listaDescargar2 = self.paraDescargar[cantidadPorCola+1:cantidadPorCola*2] # El segundo quinto.
             self.listaDescargar3 = self.paraDescargar[cantidadPorCola*2+1:cantidadPorCola*3] # El tercer quinto.
             self.listaDescargar4 = self.paraDescargar[cantidadPorCola*3+1:cantidadPorCola*4] # El cuarto quinto.
-            self.listaDescargar4 = self.paraDescargar[cantidadPorCola*4+1:] # El último quinto
-        elif len(self.paraDescargar) > 20:
+            self.listaDescargar5 = self.paraDescargar[cantidadPorCola*4+1:] # El último quinto
+        elif len(self.paraDescargar) >= 20:
             cantidadPorCola = int(round(len(self.paraDescargar) / 4))
             self.listaDescargar1 = self.paraDescargar[:cantidadPorCola] # El primer cuarto de las canciones.
             self.listaDescargar2 = self.paraDescargar[cantidadPorCola+1:cantidadPorCola*2] # El segundo cuarto.
             self.listaDescargar3 = self.paraDescargar[cantidadPorCola*2+1:cantidadPorCola*3] # El tercer cuarto.
             self.listaDescargar4 = self.paraDescargar[cantidadPorCola*3+1:] # El cuarto cuarto.
-        elif len(self.paraDescargar) > 15:
+        elif len(self.paraDescargar) >= 15:
             cantidadPorCola = int(round(len(self.paraDescargar) / 3))
             self.listaDescargar1 = self.paraDescargar[:cantidadPorCola] # El primer tercio de las canciones.
             self.listaDescargar2 = self.paraDescargar[cantidadPorCola+1:cantidadPorCola*2] # El segundo tercio.
             self.listaDescargar3 = self.paraDescargar[cantidadPorCola*2+1:] # El tercer tercio.
-        elif len(self.paraDescargar) > 10:
+        elif len(self.paraDescargar) >= 10:
             cantidadPorCola = int(round(len(self.paraDescargar) / 2))
             self.listaDescargar1 = self.paraDescargar[:cantidadPorCola] # La primera mitad de las canciones.
             self.listaDescargar2 = self.paraDescargar[cantidadPorCola+1:] # La segunda mitad.
         else:
-            cantidadPorCola = int(round(len(self.paraDescargar) / 2))
             self.listaDescargar1 = self.paraDescargar # Todas las canciones a modo monohilo.
 
     def actualizarArchivoJson(self):
@@ -98,71 +94,20 @@ class Musify_YouTube:
             for listaDescargas in recorrerDescargados:
                 if len(listaDescargas) > 0:
                     for nombreCancion in listaDescargas:
-                        self.todosDescargados.append(nombreCancion)
-                        listaDescargas.remove(nombreCancion)
+                        self.MUSIFY_TOOLS.actualizarJson(nombreCancion, "")
+                    listaDescargas = []
 
             recorrerNoDescargados = [self.nombresCancionesNoDescargadas1, self.nombresCancionesNoDescargadas2, self.nombresCancionesNoDescargadas3, self.nombresCancionesNoDescargadas4, self.nombresCancionesNoDescargadas5]
 
             for listaNoDescargas in recorrerNoDescargados:
                 if len(listaNoDescargas) > 0:
                     for nombreCancion in listaNoDescargas:
-                        self.todosNoDescargados.append(nombreCancion)
-                        listaDescargas.remove(nombreCancion)
-
-            self.MUSIFY_TOOLS.actualizarJsonListado(self.RUTA_USUARIO, self.todosDescargados, self.todosNoDescargados)
-
-            """try:
-                time.sleep(0.75)
-                # Para la lista de descargadas correctamente.
-                for nombreCancion in self.nombresCancionesDescargadas1:
-                    if MusifyTools().actualizarJson(self.RUTA_USUARIO, nombreCancion, "") != "ERROR":
-                        self.nombresCancionesDescargadas1.remove(nombreCancion)
-                
-                for nombreCancion in self.nombresCancionesDescargadas2:
-                    if MusifyTools().actualizarJson(self.RUTA_USUARIO, nombreCancion, "") != "ERROR":
-                        self.nombresCancionesDescargadas1.remove(nombreCancion)
-                
-                for nombreCancion in self.nombresCancionesDescargadas3:
-                    if MusifyTools().actualizarJson(self.RUTA_USUARIO, nombreCancion, "") != "ERROR":
-                        self.nombresCancionesDescargadas1.remove(nombreCancion)
-                
-                for nombreCancion in self.nombresCancionesDescargadas4:
-                    if MusifyTools().actualizarJson(self.RUTA_USUARIO, nombreCancion, "") != "ERROR":
-                        self.nombresCancionesDescargadas1.remove(nombreCancion)
-                
-                for nombreCancion in self.nombresCancionesDescargadas5:
-                    if MusifyTools().actualizarJson(self.RUTA_USUARIO, nombreCancion, "") != "ERROR":
-                        self.nombresCancionesDescargadas1.remove(nombreCancion)
-
-                time.sleep(0.75)
-                # Para la lista de no descargadas.
-                for nombreCancion in self.nombresCancionesNoDescargadas1:
-                    if MusifyTools().actualizarJson(self.RUTA_USUARIO, "", nombreCancion) != "ERROR":
-                        self.nombresCancionesDescargadas1.remove(nombreCancion)
-                
-                for nombreCancion in self.nombresCancionesNoDescargadas2:
-                    if MusifyTools().actualizarJson(self.RUTA_USUARIO, "", nombreCancion) != "ERROR":
-                        self.nombresCancionesDescargadas1.remove(nombreCancion)
-                
-                for nombreCancion in self.nombresCancionesNoDescargadas3:
-                    if MusifyTools().actualizarJson(self.RUTA_USUARIO, "", nombreCancion) != "ERROR":
-                        self.nombresCancionesDescargadas1.remove(nombreCancion)
-                
-                for nombreCancion in self.nombresCancionesNoDescargadas4:
-                    if MusifyTools().actualizarJson(self.RUTA_USUARIO, "", nombreCancion) != "ERROR":
-                        self.nombresCancionesDescargadas1.remove(nombreCancion)
-                
-                for nombreCancion in self.nombresCancionesNoDescargadas5:
-                    if MusifyTools().actualizarJson(self.RUTA_USUARIO, "", nombreCancion) != "ERROR":
-                        self.nombresCancionesDescargadas1.remove(nombreCancion)
-            except Exception:
-                pass"""
+                        self.MUSIFY_TOOLS.actualizarJson("", nombreCancion)
+                    listaNoDescargas = []
 
     def descargar(self, paraDescargar=list, nombreHilo=str):
         MSG_VIDEO = "VIDEO"
         MSG_AUDIO = "AUDIO"
-        RUTA_DESCARGA = self.rutaDescarga
-        self.RUTA_USUARIO = self.MUSIFY_TOOLS.obtenerDirectorioUsuario()
 
         for videoDescargable in paraDescargar:
             try:
@@ -177,29 +122,28 @@ class Musify_YouTube:
                 ANO_PUBLICACION = str(FECHA_PUBLICACION)[0:4] # Sólo el año de publicación del video en String.
 
                 nombre = self.MUSIFY_TOOLS.soloCaracteresPermitidosEnNombreDeArchivoDelSistema(f"{TITULO} - {AUTOR}.mp4")
-                if self.simplificarNombre == True:
+                if self.SIMPLIFICAR_NOMBRE == True:
                     nombre = self.MUSIFY_TOOLS.simplificarNombreArchivo(nombre)
 
-                if self.elementoDescarga == MSG_AUDIO:
+                if self.ELEMENTO_DESCARGAR == MSG_AUDIO:
                     nombre = nombre.replace("mp4", "mp3")
-                if os.path.exists(self.rutaDescarga+"\\"+nombre): # En caso de que ya se encuentre un archivo con este nombre, no se procesará éste.
+                if os.path.exists(self.RUTA_DESCARGA+"\\"+nombre): # En caso de que ya se encuentre un archivo con este nombre, no se procesará éste.
+                    self.MUSIFY_TOOLS.actualizarJson("", nombre)
                     return
-                if self.elementoDescarga == MSG_AUDIO:
+                if self.ELEMENTO_DESCARGAR == MSG_AUDIO:
                     nombre = nombre.replace("mp3", "mp4")
 
-                self.linksDescargados.append(videoDescargable)
-
-                if self.elementoDescarga == MSG_VIDEO: # Comprobamos si se desea descargar video.
+                if self.ELEMENTO_DESCARGAR == MSG_VIDEO: # Comprobamos si se desea descargar video.
                     descargable = VIDEO.streams.get_highest_resolution() # Obtenemos la mejor resolución disponible.
-                    descargable.download(output_path=RUTA_DESCARGA, filename=nombre) # Descargamos el archivo en cuestión.
+                    descargable.download(output_path=self.RUTA_DESCARGA, filename=nombre) # Descargamos el archivo en cuestión.
 
-                elif self.elementoDescarga == MSG_AUDIO:
+                elif self.ELEMENTO_DESCARGAR == MSG_AUDIO:
                     descargable = VIDEO.streams.get_audio_only() # Obtenemos únicamente el audio.
                     descargable.download(output_path=self.RUTA_USUARIO, filename=nombre)
 
                     # Ahora convertiremos el archivo de video en audio.
                     nuevoNombre = nombre.replace("mp4", "mp3") # Cambiamos el formato de MP4 a MP3.
-                    RUTA_CON_ARCHIVO = RUTA_DESCARGA+"\\"+nuevoNombre # Ubicación en donde estará el archivo que el usuario quiere descargar.
+                    RUTA_CON_ARCHIVO = self.RUTA_DESCARGA+"\\"+nuevoNombre # Ubicación en donde estará el archivo que el usuario quiere descargar.
                     RUTA_USUARIO_CON_ARCHIVO = self.RUTA_USUARIO+"\\"+nombre # Ubicación de la carpeta usuario y el archivo que descargamos antes de convertirlo.
 
                     self.MUSIFY_TOOLS.convertirArchivo(RUTA_USUARIO_CON_ARCHIVO, RUTA_CON_ARCHIVO)
@@ -221,9 +165,9 @@ class Musify_YouTube:
                 AUTOR = (VIDEO.author) # Nos devuelve el nombre del canal que ha subido ese video.
                 TITULO = (VIDEO.title) # Nos entrega el título del video.
                 nombre = str(self.MUSIFY_TOOLS.soloCaracteresPermitidosEnNombreDeArchivoDelSistema(f"{TITULO} - {AUTOR}.mp4"))
-                if self.simplificarNombre == True:
+                if self.SIMPLIFICAR_NOMBRE == True:
                     nombre = self.MUSIFY_TOOLS.simplificarNombreArchivo(nombre)
-                if self.elementoDescarga == MSG_AUDIO:
+                if self.ELEMENTO_DESCARGAR == MSG_AUDIO:
                     nombre = nombre.replace("mp4", "mp3")
 
                 if nombreHilo.upper() == "HILO1":
@@ -299,7 +243,7 @@ class Musify_YouTube:
             hiloDescarga1.daemon = True
 
             hiloDescarga1.start()
-        
-        hiloActualizador = threading.Thread(name="HiloActualizador", target=self.actualizarArchivoJson)
-        hiloActualizador.daemon = True
-        hiloActualizador.start()
+
+        hiloActualizadorYouTube = threading.Thread(name="HiloActualizadorYouTube", target=self.actualizarArchivoJson)
+        hiloActualizadorYouTube.daemon = True
+        hiloActualizadorYouTube.start()
