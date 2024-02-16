@@ -6,7 +6,7 @@ from MusifyTools import MusifyTools
 class InterfazGrafica:
     def __init__(self):
         # Constantes
-        self.VERSION = "4.0.5"
+        self.VERSION = "4.0.6"
         self.TEMAS_NOMBRES = gui.theme_list() # Todos los temas.
         self.OPCIONES_DESCARGA = ["VIDEO", "AUDIO"]
         self.MONITOR_X = screeninfo.get_monitors()[0].width # Ancho actual del monitor principal
@@ -29,7 +29,11 @@ class InterfazGrafica:
 
         self.plataformaDetectada = self.MUSIFY_TOOLS.obtenerPlataforma(self.urlDescarga)
 
+        # Con esto tendremos en cuenta si el usuario está pulsando varias veces el botón de descargar con el mismo link.
+        self.urlDescargada = []
+
         # Representación de las descargas actuales realizadas.
+        self.actualizadorDespierto = False
         self.descargados = []
         self.descargadosMostrados = []
         self.noDescargados = []
@@ -110,15 +114,18 @@ class InterfazGrafica:
             self.ventana["plataformaDetectada"].Update(self.plataformaDetectada[0])
             self.ventana["mostrarError"].Update(self.MUSIFY_TOOLS.obtenerError(self.urlDescarga, self.rutaDescarga, self.tipoDescarga))
 
-            if self.ventana["mostrarError"].get() == "":
+            if self.ventana["mostrarError"].get() == "" and self.urlDescarga not in self.urlDescargada:
                 # Iniciamos la descarga usando otro hilo para que la interfaz no se quede colgada mientras se calculan y asignan los hilos necesarios.
                 hiloInicializador = threading.Thread(name="hiloInicializador", target=self.inicializarHiloDescarga)
                 hiloInicializador.daemon = True
                 hiloInicializador.start()
+                self.urlDescargada.append(self.urlDescarga)
 
-                # Este hilo actualizará la lista de canciones descargadas continuamente.
-                hiloActualizadorGUI = threading.Thread(name="hiloActualizadorGUI", target=self.actualizarListaDescargas)
-                hiloActualizadorGUI.daemon = True
-                hiloActualizadorGUI.start()
+                if self.actualizadorDespierto == False:
+                    # Este hilo actualizará la lista de canciones descargadas continuamente.
+                    hiloActualizadorGUI = threading.Thread(name="hiloActualizadorGUI", target=self.actualizarListaDescargas)
+                    hiloActualizadorGUI.daemon = True
+                    hiloActualizadorGUI.start()
+                    self.actualizadorDespierto = True
 
         self.ventana.close()
