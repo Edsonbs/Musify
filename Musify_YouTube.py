@@ -1,9 +1,8 @@
 import pytube, re, os, threading, time
 from pytube.exceptions import AgeRestrictedError
-from MusifyTools import MusifyTools
 
 class Musify_YouTube:
-    def __init__(self, url=str, rutaDescarga=str, elementoDescarga=str, simplificarNombre=bool, musifyTools=MusifyTools()):
+    def __init__(self, url=str, rutaDescarga=str, elementoDescarga=str, simplificarNombre=bool, musifyTools=object):
         self.MUSIFY_TOOLS = musifyTools
         self.RUTA_USUARIO = self.MUSIFY_TOOLS.obtenerDirectorioUsuario()
         self.RUTA_DESCARGA = rutaDescarga
@@ -105,6 +104,29 @@ class Musify_YouTube:
                         escrituraExitosa = False
                     listaNoDescargas = []
 
+    # Tengo que hacer funcionar este código junto con el que está debajo, ya que son prácticamente iguales y los tengo que dejar en un solo método más corto.
+    def actualizarListaCancionDescargada(self, nombreHilo=str, nombreCancion=str):
+        nombreHilo = nombreHilo.upper()
+        if nombreHilo == "HILO1":
+            self.nombresCancionesDescargadas1.append(nombreCancion)
+        elif nombreHilo == "HILO2":
+            self.nombresCancionesDescargadas2.append(nombreCancion)
+        elif nombreHilo == "HILO3":
+            self.nombresCancionesDescargadas3.append(nombreCancion)
+        elif nombreHilo == "HILO4":
+            self.nombresCancionesDescargadas4.append(nombreCancion)
+
+    def actualizarListaCancionNoDescargada(self, nombreHilo=str, nombreCancion=str):
+        nombreHilo = nombreHilo.upper()
+        if nombreHilo == "HILO1":
+            self.nombresCancionesNoDescargadas1.append(nombreCancion)
+        elif nombreHilo == "HILO2":
+            self.nombresCancionesNoDescargadas2.append(nombreCancion)
+        elif nombreHilo == "HILO3":
+            self.nombresCancionesNoDescargadas3.append(nombreCancion)
+        elif nombreHilo == "HILO4":
+            self.nombresCancionesNoDescargadas4.append(nombreCancion)
+
     def descargar(self, paraDescargar=list, nombreHilo=str):
         MSG_VIDEO = "VIDEO"
         MSG_AUDIO = "AUDIO"
@@ -120,6 +142,7 @@ class Musify_YouTube:
                 VISUALIZACIONES = (VIDEO.views) # Entrega las visitas que tiene el video.
                 FECHA_PUBLICACION = (VIDEO.publish_date) # Entrega la fecha de publicación.
                 ANO_PUBLICACION = str(FECHA_PUBLICACION)[0:4] # Sólo el año de publicación del video en String.
+                yaDescargado = False
 
                 nombre = self.MUSIFY_TOOLS.soloCaracteresPermitidosEnNombreDeArchivoDelSistema(f"{TITULO} - {AUTOR}.mp4")
                 if self.SIMPLIFICAR_NOMBRE == True:
@@ -128,41 +151,31 @@ class Musify_YouTube:
                 if self.ELEMENTO_DESCARGAR == MSG_AUDIO:
                     nombre = nombre.replace("mp4", "mp3")
                 if os.path.exists(self.RUTA_DESCARGA+"\\"+nombre): # En caso de que ya se encuentre un archivo con este nombre, no se procesará éste.
-                    escrituraExitosa = False
-                    while escrituraExitosa == False:
-                        actualizar = self.MUSIFY_TOOLS.actualizarJson("", nombre)
-                        if actualizar != None:
-                            escrituraExitosa = True
-                    escrituraExitosa = False
-                    return
+                    self.actualizarListaCancionNoDescargada(nombreHilo, nombre)
+                    yaDescargado = True
                 if self.ELEMENTO_DESCARGAR == MSG_AUDIO:
                     nombre = nombre.replace("mp3", "mp4")
 
-                if self.ELEMENTO_DESCARGAR == MSG_VIDEO: # Comprobamos si se desea descargar video.
-                    descargable = VIDEO.streams.get_highest_resolution() # Obtenemos la mejor resolución disponible.
-                    descargable.download(output_path=self.RUTA_DESCARGA, filename=nombre) # Descargamos el archivo en cuestión.
+                if yaDescargado == False:
+                    if self.ELEMENTO_DESCARGAR == MSG_VIDEO: # Comprobamos si se desea descargar video.
+                        descargable = VIDEO.streams.get_highest_resolution() # Obtenemos la mejor resolución disponible.
+                        descargable.download(output_path=self.RUTA_DESCARGA, filename=nombre) # Descargamos el archivo en cuestión.
 
-                elif self.ELEMENTO_DESCARGAR == MSG_AUDIO:
-                    descargable = VIDEO.streams.get_audio_only() # Obtenemos únicamente el audio.
-                    descargable.download(output_path=self.RUTA_USUARIO, filename=nombre)
+                    elif self.ELEMENTO_DESCARGAR == MSG_AUDIO:
+                        descargable = VIDEO.streams.get_audio_only() # Obtenemos únicamente el audio.
+                        descargable.download(output_path=self.RUTA_USUARIO, filename=nombre)
 
-                    # Ahora convertiremos el archivo de video en audio.
-                    nuevoNombre = nombre.replace("mp4", "mp3") # Cambiamos el formato de MP4 a MP3.
-                    RUTA_CON_ARCHIVO = self.RUTA_DESCARGA+"\\"+nuevoNombre # Ubicación en donde estará el archivo que el usuario quiere descargar.
-                    RUTA_USUARIO_CON_ARCHIVO = self.RUTA_USUARIO+"\\"+nombre # Ubicación de la carpeta usuario y el archivo que descargamos antes de convertirlo.
+                        # Ahora convertiremos el archivo de video en audio.
+                        nuevoNombre = nombre.replace("mp4", "mp3") # Cambiamos el formato de MP4 a MP3.
+                        RUTA_CON_ARCHIVO = self.RUTA_DESCARGA+"\\"+nuevoNombre # Ubicación en donde estará el archivo que el usuario quiere descargar.
+                        RUTA_USUARIO_CON_ARCHIVO = self.RUTA_USUARIO+"\\"+nombre # Ubicación de la carpeta usuario y el archivo que descargamos antes de convertirlo.
 
-                    self.MUSIFY_TOOLS.convertirArchivo(RUTA_USUARIO_CON_ARCHIVO, RUTA_CON_ARCHIVO)
-                    self.MUSIFY_TOOLS.editarMetadatoMP3(RUTA_CON_ARCHIVO, AUTOR, PORTADA, ANO_PUBLICACION)
-                    nombre = nuevoNombre # Para cuando lo añadamos a los descargados.
+                        self.MUSIFY_TOOLS.convertirArchivo(RUTA_USUARIO_CON_ARCHIVO, RUTA_CON_ARCHIVO)
+                        self.MUSIFY_TOOLS.editarMetadatoMP3(RUTA_CON_ARCHIVO, AUTOR, PORTADA, ANO_PUBLICACION)
+                        nombre = nuevoNombre # Para cuando lo añadamos a los descargados.
 
-                if nombreHilo.upper() == "HILO1":
-                    self.nombresCancionesDescargadas1.append(nombre)
-                elif nombreHilo.upper() == "HILO2":
-                    self.nombresCancionesDescargadas2.append(nombre)
-                elif nombreHilo.upper() == "HILO3":
-                    self.nombresCancionesDescargadas3.append(nombre)
-                elif nombreHilo.upper() == "HILO4":
-                    self.nombresCancionesDescargadas4.append(nombre)
+                    # Ahora vamos a poner las canciones en su correspondiente lista.
+                    self.actualizarListaCancionDescargada(nombreHilo, nombre)
             except AgeRestrictedError or Exception:
                 try:
                     VIDEO = pytube.YouTube(videoDescargable)
@@ -174,21 +187,10 @@ class Musify_YouTube:
                     if self.ELEMENTO_DESCARGAR == MSG_AUDIO:
                         nombre = nombre.replace("mp4", "mp3")
 
-                    if nombreHilo.upper() == "HILO1":
-                        self.nombresCancionesNoDescargadas1.append(nombre)
-                    elif nombreHilo.upper() == "HILO2":
-                        self.nombresCancionesNoDescargadas2.append(nombre)
-                    elif nombreHilo.upper() == "HILO3":
-                        self.nombresCancionesNoDescargadas3.append(nombre)
-                    elif nombreHilo.upper() == "HILO4":
-                        self.nombresCancionesNoDescargadas4.append(nombre)
+                    # Actualizaremos la correspondiente lista de canciones no descargadas.
+                    self.actualizarListaCancionNoDescargada(nombreHilo, nombre)
                 except Exception:
-                    escrituraExitosa = False
-                    while escrituraExitosa == False:
-                        actualizar = self.MUSIFY_TOOLS.actualizarJson("", videoDescargable)
-                        if actualizar != None:
-                            escrituraExitosa = True
-                    escrituraExitosa = False
+                    self.actualizarListaCancionNoDescargada(nombreHilo, videoDescargable)
 
     def iniciarDescarga(self):
         self.prepararDescarga()
