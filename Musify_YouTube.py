@@ -1,10 +1,9 @@
 import pytube, re, os, threading, time
-from MusifyTools import MusifyTools
 from pytube.exceptions import AgeRestrictedError
 
 class Musify_YouTube:
-    def __init__(self, url=str, rutaDescarga=str, elementoDescarga=str, simplificarNombre=bool):
-        self.MUSIFY_TOOLS = MusifyTools()
+    def __init__(self, url=str, rutaDescarga=str, elementoDescarga=str, simplificarNombre=bool, musifyTools=object):
+        self.MUSIFY_TOOLS = musifyTools
         self.RUTA_USUARIO = self.MUSIFY_TOOLS.obtenerDirectorioUsuario()
         self.RUTA_DESCARGA = rutaDescarga
         self.URL_DESCARGAR = url
@@ -18,19 +17,16 @@ class Musify_YouTube:
         self.nombresCancionesDescargadas2 = []
         self.nombresCancionesDescargadas3 = []
         self.nombresCancionesDescargadas4 = []
-        self.nombresCancionesDescargadas5 = []
 
         self.nombresCancionesNoDescargadas1 = []
         self.nombresCancionesNoDescargadas2 = []
         self.nombresCancionesNoDescargadas3 = []
         self.nombresCancionesNoDescargadas4 = []
-        self.nombresCancionesNoDescargadas5 = []
 
         self.listaDescargar1 = []
         self.listaDescargar2 = []
         self.listaDescargar3 = []
         self.listaDescargar4 = []
-        self.listaDescargar5 = []
 
     def obtenerDescargasTotales(self):
         return self.cantidadDescargasTotales
@@ -61,14 +57,7 @@ class Musify_YouTube:
             self.linksDescargados.append(self.URL_DESCARGAR)
 
         # Vamos a dividir la cola de descargas en varias para descargar en modo multithreading.
-        if len(self.paraDescargar) >= 25:
-            cantidadPorCola = int(round(len(self.paraDescargar) / 5))
-            self.listaDescargar1 = self.paraDescargar[:cantidadPorCola] # El primer quinto de las canciones.
-            self.listaDescargar2 = self.paraDescargar[cantidadPorCola+1:cantidadPorCola*2] # El segundo quinto.
-            self.listaDescargar3 = self.paraDescargar[cantidadPorCola*2+1:cantidadPorCola*3] # El tercer quinto.
-            self.listaDescargar4 = self.paraDescargar[cantidadPorCola*3+1:cantidadPorCola*4] # El cuarto quinto.
-            self.listaDescargar5 = self.paraDescargar[cantidadPorCola*4+1:] # El último quinto
-        elif len(self.paraDescargar) >= 20:
+        if len(self.paraDescargar) >= 20:
             cantidadPorCola = int(round(len(self.paraDescargar) / 4))
             self.listaDescargar1 = self.paraDescargar[:cantidadPorCola] # El primer cuarto de las canciones.
             self.listaDescargar2 = self.paraDescargar[cantidadPorCola+1:cantidadPorCola*2] # El segundo cuarto.
@@ -88,21 +77,31 @@ class Musify_YouTube:
 
     def actualizarArchivoJson(self):
         while True:
-            time.sleep(0.8)
-            recorrerDescargados = [self.nombresCancionesDescargadas1, self.nombresCancionesDescargadas2, self.nombresCancionesDescargadas3, self.nombresCancionesDescargadas4, self.nombresCancionesDescargadas5]
+            time.sleep(1)
+            recorrerDescargados = [self.nombresCancionesDescargadas1, self.nombresCancionesDescargadas2, self.nombresCancionesDescargadas3, self.nombresCancionesDescargadas4]
 
             for listaDescargas in recorrerDescargados:
                 if len(listaDescargas) > 0:
                     for nombreCancion in listaDescargas:
-                        self.MUSIFY_TOOLS.actualizarJson(nombreCancion, "")
+                        escrituraExitosa = False
+                        while escrituraExitosa == False:
+                            actualizar = self.MUSIFY_TOOLS.actualizarJson(nombreCancion, "")
+                            if actualizar != None:
+                                escrituraExitosa = True
+                        escrituraExitosa = False
                     listaDescargas = []
 
-            recorrerNoDescargados = [self.nombresCancionesNoDescargadas1, self.nombresCancionesNoDescargadas2, self.nombresCancionesNoDescargadas3, self.nombresCancionesNoDescargadas4, self.nombresCancionesNoDescargadas5]
+            recorrerNoDescargados = [self.nombresCancionesNoDescargadas1, self.nombresCancionesNoDescargadas2, self.nombresCancionesNoDescargadas3, self.nombresCancionesNoDescargadas4]
 
             for listaNoDescargas in recorrerNoDescargados:
                 if len(listaNoDescargas) > 0:
                     for nombreCancion in listaNoDescargas:
-                        self.MUSIFY_TOOLS.actualizarJson("", nombreCancion)
+                        escrituraExitosa = False
+                        while escrituraExitosa == False:
+                            actualizar = self.MUSIFY_TOOLS.actualizarJson("", nombreCancion)
+                            if actualizar != None:
+                                escrituraExitosa = True
+                        escrituraExitosa = False
                     listaNoDescargas = []
 
     def descargar(self, paraDescargar=list, nombreHilo=str):
@@ -158,8 +157,6 @@ class Musify_YouTube:
                     self.nombresCancionesDescargadas3.append(nombre)
                 elif nombreHilo.upper() == "HILO4":
                     self.nombresCancionesDescargadas4.append(nombre)
-                elif nombreHilo.upper() == "HILO5":
-                    self.nombresCancionesDescargadas5.append(nombre)
             except AgeRestrictedError or Exception:
                 VIDEO = pytube.YouTube(videoDescargable)
                 AUTOR = (VIDEO.author) # Nos devuelve el nombre del canal que ha subido ese video.
@@ -178,30 +175,10 @@ class Musify_YouTube:
                     self.nombresCancionesNoDescargadas3.append(nombre)
                 elif nombreHilo.upper() == "HILO4":
                     self.nombresCancionesNoDescargadas4.append(nombre)
-                elif nombreHilo.upper() == "HILO5":
-                    self.nombresCancionesNoDescargadas5.append(nombre)
 
     def iniciarDescarga(self):
         self.prepararDescarga()
-        if len(self.listaDescargar5) > 0:
-            hiloDescarga5 = threading.Thread(name="HiloDescarga5", target=self.descargar, args=(self.listaDescargar5, "HILO5"))
-            hiloDescarga4 = threading.Thread(name="HiloDescarga4", target=self.descargar, args=(self.listaDescargar4, "HILO4"))
-            hiloDescarga3 = threading.Thread(name="HiloDescarga3", target=self.descargar, args=(self.listaDescargar3, "HILO3"))
-            hiloDescarga2 = threading.Thread(name="HiloDescarga2", target=self.descargar, args=(self.listaDescargar2, "HILO2"))
-            hiloDescarga1 = threading.Thread(name="HiloDescarga1", target=self.descargar, args=(self.listaDescargar1, "HILO1"))
-
-            hiloDescarga5.daemon = True
-            hiloDescarga4.daemon = True
-            hiloDescarga3.daemon = True
-            hiloDescarga2.daemon = True
-            hiloDescarga1.daemon = True
-
-            hiloDescarga5.start()
-            hiloDescarga4.start()
-            hiloDescarga3.start()
-            hiloDescarga2.start()
-            hiloDescarga1.start()
-        elif len(self.listaDescargar4) > 0:
+        if len(self.listaDescargar4) > 0:
             hiloDescarga4 = threading.Thread(name="HiloDescarga4", target=self.descargar, args=(self.listaDescargar4, "HILO4"))
             hiloDescarga3 = threading.Thread(name="HiloDescarga3", target=self.descargar, args=(self.listaDescargar3, "HILO3"))
             hiloDescarga2 = threading.Thread(name="HiloDescarga2", target=self.descargar, args=(self.listaDescargar2, "HILO2"))

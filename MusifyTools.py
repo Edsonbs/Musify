@@ -1,4 +1,4 @@
-import platform, os, requests, re, json
+import platform, os, requests, re, json, threading
 from moviepy.editor import *
 from mutagen.mp3 import MP3
 from mutagen.id3 import APIC
@@ -6,7 +6,9 @@ from mutagen.easyid3 import EasyID3
 
 class MusifyTools:
     def __init__(self):
+        self.NOMBRE_JSON = "MusifyData.json"
         self.directorioHome = os.path.expanduser('~')
+        self.bloqueo = threading.Lock() # Esta función bloqueará el recurso para que ningún otro hilo acceda al archivo mientras se edita.
 
     # Devuelve el nombre de la plataforma en la que está corriendo el programa.
     def detectarSistemaOperativo(self):
@@ -44,14 +46,14 @@ class MusifyTools:
         nombreArchivo = nombreArchivo.split(" ")
 
         for palabra in nombreArchivo:
-            if palabra in eliminarGrupal:
+            if palabra.upper() in eliminarGrupal:
                 eliminar.append(palabra)
-            elif palabra in eliminarSolitario:
-                nombreResultante.replace(palabra, "")
+            elif palabra.upper() in eliminarSolitario:
+                nombreResultante = nombreResultante.replace(palabra, "")
 
         if len(eliminar) > 1:
             for palabra in eliminar:
-                nombreResultante.replace(palabra, "")
+                nombreResultante = nombreResultante.replace(palabra, "")
 
         return nombreResultante
 
@@ -70,6 +72,7 @@ class MusifyTools:
         return f"{os.path.expanduser('~')}\\Desktop"
 
     def obtenerPlataforma(self, url):
+        patronYoutubeMusic = re.search(r'\bmusic.youtube.com\b', url)
         patronYoutube1 = re.search(r'\byoutube.com\b', url)
         patronYoutube2 = re.search(r'\byoutu.be\b', url)
         patronSpotify = re.search(r'\bspotify.com\b', url)
@@ -79,7 +82,9 @@ class MusifyTools:
         patronTiktok = re.search(r'\btiktok.com\b', url)
         patronTwitch = re.search(r'\btwitch.tv\b', url)
 
-        if (patronYoutube1 != None and patronYoutube1.group() == "youtube.com") or (patronYoutube2 != None and patronYoutube2.group() == "youtu.be"):
+        if patronYoutubeMusic != None and patronYoutubeMusic.group() == "music.youtube.com":
+            return "YouTube Music", "#FA0404"
+        elif (patronYoutube1 != None and patronYoutube1.group() == "youtube.com") or (patronYoutube2 != None and patronYoutube2.group() == "youtu.be"):
             return "YouTube", "#FA0404"
         elif patronSpotify != None and patronSpotify.group() == "spotify.com":
             return "Spotify", "#1DE33E"
@@ -96,14 +101,15 @@ class MusifyTools:
 
     def obtenerError(self, url=str, ruta=str, tipoDescarga=str):
         error = ""
+        plataformasAdmitidas = ["YOUTUBE", "YOUTUBE MUSIC"]
 
         patronURL = re.search(r'\bhttps\b', url)
         patronURL2 = re.search(r'\bhttp\b', url)
 
         if (patronURL != None and patronURL.group() != "https") or (patronURL2 != None and patronURL2.group() != "http"):
             error = "Debes introducir un link."
-        elif self.obtenerPlataforma(url)[0].upper() != "YOUTUBE":
-            error = "Debes introducir un link de [YouTube] específicamente."
+        elif self.obtenerPlataforma(url)[0].upper() not in plataformasAdmitidas:
+            error = f"Debes introducir un link de {plataformasAdmitidas} específicamente."
         elif os.path.isdir(str(ruta)) == False:
             error = "Has seleccionado una carpeta que no existe."
         elif tipoDescarga.upper() not in ["AUDIO", "VIDEO"]:
@@ -150,25 +156,36 @@ class MusifyTools:
         pass
 
     def crearJson(self):
-        NOMBRE_JSON = "MusifyData.json"
         datosJson = {"Descargados": [], "NoDescargados": []}
-        with open(self.directorioHome+"\\"+NOMBRE_JSON, "w") as archivo:
+        with open(self.directorioHome+"\\"+self.NOMBRE_JSON, "w") as archivo:
             json.dump(datosJson, archivo)
 
     def actualizarJson(self, descargadoAnadir=str, noDescargadoAnadir=str):
-        NOMBRE_JSON = "MusifyData.json"
-        jsonData = self.leerJson()
+        self.bloqueo.acquire()
+        try:
+            jsonData = self.leerJson()
 
-        if descargadoAnadir != "" and descargadoAnadir != None:
-            jsonData["Descargados"].append(descargadoAnadir)
-        if noDescargadoAnadir != "" and noDescargadoAnadir != None:
-            jsonData["NoDescargados"].append(noDescargadoAnadir)
+            if jsonData != None:
+                if descargadoAnadir != "" and descargadoAnadir != None:
+                    jsonData["Descargados"].append(descargadoAnadir)
+                if noDescargadoAnadir != "" and noDescargadoAnadir != None:
+                    jsonData["NoDescargados"].append(noDescargadoAnadir)
 
-        with open(self.directorioHome+"\\"+NOMBRE_JSON, "w") as archivo:
-            json.dump(jsonData, archivo)
+                with open(self.directorioHome+"\\"+self.NOMBRE_JSON, "w") as archivo:
+                    json.dump(jsonData, archivo)
+                return "HECHO" # Esto únicamente lo devuelvo para gestionar el caso en que no se pueda acceder al archivo en Musify_YouTube.py
+        except Exception:
+            return None # Le aplica lo mismo comentado anteriormente.
+        finally:
+            self.bloqueo.release()
 
     def leerJson(self):
-        NOMBRE_JSON = "MusifyData.json"
-        with open(self.directorioHome+"\\"+NOMBRE_JSON, "r") as archivo:
-            jsonData = json.load(archivo)
-        return jsonData
+        """self.bloqueo.acquire()"""
+        try:
+            with open(self.directorioHome+"\\"+self.NOMBRE_JSON, "r") as archivo:
+                jsonData = json.load(archivo)
+            return jsonData
+        except Exception:
+            return None
+        """finally:
+            self.bloqueo.release()"""
