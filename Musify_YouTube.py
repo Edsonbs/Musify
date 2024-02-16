@@ -176,6 +176,7 @@ class Musify_YouTube:
 
                     # Ahora vamos a poner las canciones en su correspondiente lista.
                     self.actualizarListaCancionDescargada(nombreHilo, nombre)
+                yaDescargado = False
             except AgeRestrictedError or Exception:
                 try:
                     VIDEO = pytube.YouTube(videoDescargable)
