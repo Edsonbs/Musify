@@ -1,8 +1,9 @@
 import pytube, re, os, threading, time
 from pytube.exceptions import AgeRestrictedError
+from MusifyTools import MusifyTools
 
 class Musify_YouTube:
-    def __init__(self, url=str, rutaDescarga=str, elementoDescarga=str, simplificarNombre=bool, musifyTools=object):
+    def __init__(self, url=str, rutaDescarga=str, elementoDescarga=str, simplificarNombre=bool, musifyTools=MusifyTools()):
         self.MUSIFY_TOOLS = musifyTools
         self.RUTA_USUARIO = self.MUSIFY_TOOLS.obtenerDirectorioUsuario()
         self.RUTA_DESCARGA = rutaDescarga
@@ -127,7 +128,12 @@ class Musify_YouTube:
                 if self.ELEMENTO_DESCARGAR == MSG_AUDIO:
                     nombre = nombre.replace("mp4", "mp3")
                 if os.path.exists(self.RUTA_DESCARGA+"\\"+nombre): # En caso de que ya se encuentre un archivo con este nombre, no se procesará éste.
-                    self.MUSIFY_TOOLS.actualizarJson("", nombre)
+                    escrituraExitosa = False
+                    while escrituraExitosa == False:
+                        actualizar = self.MUSIFY_TOOLS.actualizarJson("", nombre)
+                        if actualizar != None:
+                            escrituraExitosa = True
+                    escrituraExitosa = False
                     return
                 if self.ELEMENTO_DESCARGAR == MSG_AUDIO:
                     nombre = nombre.replace("mp3", "mp4")
@@ -158,23 +164,31 @@ class Musify_YouTube:
                 elif nombreHilo.upper() == "HILO4":
                     self.nombresCancionesDescargadas4.append(nombre)
             except AgeRestrictedError or Exception:
-                VIDEO = pytube.YouTube(videoDescargable)
-                AUTOR = (VIDEO.author) # Nos devuelve el nombre del canal que ha subido ese video.
-                TITULO = (VIDEO.title) # Nos entrega el título del video.
-                nombre = str(self.MUSIFY_TOOLS.soloCaracteresPermitidosEnNombreDeArchivoDelSistema(f"{TITULO} - {AUTOR}.mp4"))
-                if self.SIMPLIFICAR_NOMBRE == True:
-                    nombre = self.MUSIFY_TOOLS.simplificarNombreArchivo(nombre)
-                if self.ELEMENTO_DESCARGAR == MSG_AUDIO:
-                    nombre = nombre.replace("mp4", "mp3")
+                try:
+                    VIDEO = pytube.YouTube(videoDescargable)
+                    AUTOR = (VIDEO.author) # Nos devuelve el nombre del canal que ha subido ese video.
+                    TITULO = (VIDEO.title) # Nos entrega el título del video.
+                    nombre = str(self.MUSIFY_TOOLS.soloCaracteresPermitidosEnNombreDeArchivoDelSistema(f"{TITULO} - {AUTOR}.mp4"))
+                    if self.SIMPLIFICAR_NOMBRE == True:
+                        nombre = self.MUSIFY_TOOLS.simplificarNombreArchivo(nombre)
+                    if self.ELEMENTO_DESCARGAR == MSG_AUDIO:
+                        nombre = nombre.replace("mp4", "mp3")
 
-                if nombreHilo.upper() == "HILO1":
-                    self.nombresCancionesNoDescargadas1.append(nombre)
-                elif nombreHilo.upper() == "HILO2":
-                    self.nombresCancionesNoDescargadas2.append(nombre)
-                elif nombreHilo.upper() == "HILO3":
-                    self.nombresCancionesNoDescargadas3.append(nombre)
-                elif nombreHilo.upper() == "HILO4":
-                    self.nombresCancionesNoDescargadas4.append(nombre)
+                    if nombreHilo.upper() == "HILO1":
+                        self.nombresCancionesNoDescargadas1.append(nombre)
+                    elif nombreHilo.upper() == "HILO2":
+                        self.nombresCancionesNoDescargadas2.append(nombre)
+                    elif nombreHilo.upper() == "HILO3":
+                        self.nombresCancionesNoDescargadas3.append(nombre)
+                    elif nombreHilo.upper() == "HILO4":
+                        self.nombresCancionesNoDescargadas4.append(nombre)
+                except Exception:
+                    escrituraExitosa = False
+                    while escrituraExitosa == False:
+                        actualizar = self.MUSIFY_TOOLS.actualizarJson("", videoDescargable)
+                        if actualizar != None:
+                            escrituraExitosa = True
+                    escrituraExitosa = False
 
     def iniciarDescarga(self):
         self.prepararDescarga()

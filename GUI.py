@@ -6,7 +6,7 @@ from MusifyTools import MusifyTools
 class InterfazGrafica:
     def __init__(self):
         # Constantes
-        self.VERSION = "4.0.0"
+        self.VERSION = "4.0.1"
         self.TEMAS_NOMBRES = gui.theme_list() # Todos los temas.
         self.OPCIONES_DESCARGA = ["VIDEO", "AUDIO"]
         self.MONITOR_X = screeninfo.get_monitors()[0].width # Ancho actual del monitor principal
