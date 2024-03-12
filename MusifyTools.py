@@ -33,6 +33,10 @@ class MusifyTools:
         for caracter in listaRevisar:
             nombreResultante = nombreResultante.replace(caracter, "")
 
+        nombreResultante = nombreResultante.replace("    ", " ")
+        nombreResultante = nombreResultante.replace("   ", " ")
+        nombreResultante = nombreResultante.replace("  ", " ")
+
         return nombreResultante
 
     # Este es un algoritmo que elimina fragmentos de los nombres que se le ponen a un video en YouTube de forma general.
@@ -54,6 +58,10 @@ class MusifyTools:
         if len(eliminar) > 1:
             for palabra in eliminar:
                 nombreResultante = nombreResultante.replace(palabra, "")
+        
+        nombreResultante = nombreResultante.replace("    ", " ")
+        nombreResultante = nombreResultante.replace("   ", " ")
+        nombreResultante = nombreResultante.replace("  ", " ")
 
         return nombreResultante
 
