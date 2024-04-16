@@ -6,15 +6,15 @@ from MusifyTools import MusifyTools
 class InterfazGrafica:
     def __init__(self):
         # Constantes
-        self.VERSION = "4.0.6"
+        self.VERSION = "4.1.0"
         self.TEMAS_NOMBRES = gui.theme_list() # Todos los temas.
         self.OPCIONES_DESCARGA = ["VIDEO", "AUDIO"]
         self.MONITOR_X = screeninfo.get_monitors()[0].width # Ancho actual del monitor principal
         self.MONITOR_Y = monitor_y = screeninfo.get_monitors()[0].height # Alto del monitor principal
         self.TIPOGRAFIA_1, self.TIPOGRAFIA_2, self.TIPOGRAFIA_3 = "Terminal", "Minecraft", "Courier" # Otra opción como fuente 3 sería "Pixellari".
         self.TAMANO_TITULO, self.TAMANO_TITULO2, self.TAMANO_INPUT, self.TAMANO_TEXTO_SIMPLE, self.TAMANO_TEXTO_MINI = 34, 18, 15, 12, 8
-        self.RESOLUCION_X = int(round(self.MONITOR_X/2.5, 0))
-        self.RESOLUCION_Y = int(round(self.MONITOR_Y/1.5, 0))
+        self.RESOLUCION_X = int(round(self.MONITOR_X/2, 0))
+        self.RESOLUCION_Y = int(round(self.MONITOR_Y/2, 0))
         self.MUSIFY_TOOLS = MusifyTools()
         self.RUTA_USUARIO = self.MUSIFY_TOOLS.obtenerDirectorioUsuario()
 
@@ -38,8 +38,8 @@ class InterfazGrafica:
         self.descargadosMostrados = []
         self.noDescargados = []
         self.noDescargadosMostrados = []
-        self.cantidadDescargadas = 0
         self.descargasTotales = 0
+        self.cantidadDescargadas = 0
         self.cantidadNoDescargados = 0
         self.elementosInterfaz = [  [gui.Text("")],
                                     [gui.Text("Musify", text_color="white", font=f"{self.TIPOGRAFIA_1} {self.TAMANO_TITULO}", justification="center", size=(self.MONITOR_X, 3))],
@@ -60,7 +60,7 @@ class InterfazGrafica:
     def actualizarListaDescargas(self):
         while True:
             time.sleep(1)
-            ficheroJson = self.MUSIFY_TOOLS.leerJson()
+            ficheroJson = self.MUSIFY_TOOLS.leerYVaciarJson()
             if ficheroJson != None:
                 self.descargados = ficheroJson["Descargados"]
                 self.noDescargados = ficheroJson["NoDescargados"]
@@ -81,7 +81,7 @@ class InterfazGrafica:
                 for noDescargado in self.noDescargados:
                     if noDescargado not in self.noDescargadosMostrados:
                         self.noDescargadosMostrados.append(noDescargado)
-                        self.cantidadNoDescargados = len(self.noDescargados)
+                        self.cantidadNoDescargados += 1
                         contadorNoDescargado = f"No descargados: {self.cantidadNoDescargados}/{self.descargasTotales}"
 
                         # Ahora actualizaremos la GUI con las no descargadas.

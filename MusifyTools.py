@@ -7,25 +7,42 @@ from mutagen.easyid3 import EasyID3
 class MusifyTools:
     def __init__(self):
         self.NOMBRE_JSON = "MusifyData.json"
-        self.directorioHome = os.path.expanduser('~')
+        self.directorioHome = self.obtenerDirectorioUsuario()
         self.bloqueo = threading.Lock() # Esta función bloqueará el recurso para que ningún otro hilo acceda al archivo mientras se edita.
 
     # Devuelve el nombre de la plataforma en la que está corriendo el programa.
     def detectarSistemaOperativo(self):
         return platform.system()
 
+    def esWindows(self):
+        if self.detectarSistemaOperativo().upper() == "WINDOWS":
+            return True
+        else:
+            return False
+
+    def esLinux(self):
+        if self.detectarSistemaOperativo().upper() == "LINUX":
+            return True
+        else:
+            return False
+
+    def esMac(self):
+        if self.detectarSistemaOperativo().upper() == "DARWIN":
+            return True
+        else:
+            return False
+
     # Elimina caracteres de un string que no pueden ser aplicados a nombres de archivos de distintos SO.
     def soloCaracteresPermitidosEnNombreDeArchivoDelSistema(self, nombreArchivo=str):
-        plataforma = self.detectarSistemaOperativo()
         caracteresNoPermitidosWindows = ["<", ">", ":", '"', "/", "\\", "|", "?", "*"]
         caracteresNoPermitidosUnix = ["/"]
         listaRevisar = list
         nombreResultante = nombreArchivo
 
         # Vamos a revisar en qué plataforma está corriendo el programa.
-        if plataforma.upper() == "WINDOWS":
+        if self.esWindows():
             listaRevisar = caracteresNoPermitidosWindows
-        elif plataforma.upper() in ["LINUX", "DARWIN"]:
+        elif self.esLinux() or self.esMac():
             listaRevisar = caracteresNoPermitidosUnix
 
         # Vamos a eliminar los caracteres del nombre del archivo que no estén permitidos en ese sistema.
@@ -158,13 +175,10 @@ class MusifyTools:
 
         # Eliminaremos la foto que he descargado para asignarla como metadatos.
         os.remove(imagen)
-    
-    def editarMetadatoMP4(self, rutaYNombreArchivo="", autor=None, portada=None, anoPublicacion=None):
-        # AÚN POR IMPLEMENTAR
-        pass
 
     def crearJson(self):
         datosJson = {"Descargados": [], "NoDescargados": []}
+
         with open(self.directorioHome+"\\"+self.NOMBRE_JSON, "w") as archivo:
             json.dump(datosJson, archivo)
 
@@ -197,3 +211,22 @@ class MusifyTools:
             return None
         """finally:
             self.bloqueo.release()"""
+
+    def leerYVaciarJson(self):
+        self.bloqueo.acquire()
+        try:
+            jsonData = self.leerJson()
+            jsonDataToReturn = jsonData
+
+            if jsonData != None:
+                jsonData["Descargados"] = []
+                jsonData["NoDescargados"] = []
+
+                with open(self.directorioHome+"\\"+self.NOMBRE_JSON, "w") as archivo:
+                    json.dump(jsonData, archivo)
+
+            return jsonDataToReturn
+        except Exception:
+            return None
+        finally:
+            self.bloqueo.release()
