@@ -14,7 +14,7 @@ class InterfazGrafica:
         self.TIPOGRAFIA_1, self.TIPOGRAFIA_2, self.TIPOGRAFIA_3 = "Terminal", "Minecraft", "Courier" # Otra opción como fuente 3 sería "Pixellari".
         self.TAMANO_TITULO, self.TAMANO_TITULO2, self.TAMANO_INPUT, self.TAMANO_TEXTO_SIMPLE, self.TAMANO_TEXTO_MINI = 34, 18, 15, 12, 8
         self.RESOLUCION_X = int(round(self.MONITOR_X/2, 0))
-        self.RESOLUCION_Y = int(round(self.MONITOR_Y/2, 0))
+        self.RESOLUCION_Y = int(round(self.MONITOR_Y/1.5, 0))
         self.MUSIFY_TOOLS = MusifyTools()
         self.RUTA_USUARIO = self.MUSIFY_TOOLS.obtenerDirectorioUsuario()
 
