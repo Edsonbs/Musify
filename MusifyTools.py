@@ -215,8 +215,8 @@ class MusifyTools:
     def leerYVaciarJson(self):
         self.bloqueo.acquire()
         try:
+            jsonDataToReturn = self.leerJson()
             jsonData = self.leerJson()
-            jsonDataToReturn = jsonData
 
             if jsonData != None:
                 jsonData["Descargados"] = []
