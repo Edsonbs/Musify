@@ -95,7 +95,7 @@ class InterfazGrafica:
         self.Musify_YouTube.iniciarDescarga()
 
     def iniciarVentana(self):
-        self.ventana = gui.Window("Musify", layout=self.elementosInterfaz, size=(self.RESOLUCION_X, self.RESOLUCION_Y), resizable=True, icon="Musify_Logo.ico")
+        self.ventana = gui.Window("Musify", layout=self.elementosInterfaz, size=(self.RESOLUCION_X, self.RESOLUCION_Y), resizable=True, icon="./logo/Musify_Logo.ico")
         while True:
             evento, contenidoGUI = self.ventana.read()
             if evento == gui.WIN_CLOSED:
