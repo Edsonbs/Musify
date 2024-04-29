@@ -1,2 +1,0 @@
-Cuando vuelvo a descargar otros archivos sin haber cerrado el programa anteriormente, no me aparece un nuevo máximo
-de archivos descargados.
