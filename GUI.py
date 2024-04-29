@@ -6,7 +6,7 @@ from MusifyTools import MusifyTools
 class InterfazGrafica:
     def __init__(self):
         # Constantes
-        self.VERSION = "4.1.1"
+        self.VERSION = "4.1.2"
         self.TEMAS_NOMBRES = gui.theme_list() # Todos los temas.
         self.OPCIONES_DESCARGA = ["VIDEO", "AUDIO"]
         self.MONITOR_X = screeninfo.get_monitors()[0].width # Ancho actual del monitor principal
@@ -54,7 +54,7 @@ class InterfazGrafica:
                                     [gui.Text(f"Made by Eddyson {self.VERSION}", text_color="white", font=f"{self.TIPOGRAFIA_2} {self.TAMANO_TEXTO_SIMPLE}")],
                                     [gui.Text("", text_color="red", font=f"{self.TIPOGRAFIA_2} {self.TAMANO_TEXTO_SIMPLE}", key="mostrarError", justification="center", size=(500, 1))],
                                     [gui.Column([[gui.Text("Descargadas:", font=(self.TIPOGRAFIA_3, self.TAMANO_TEXTO_SIMPLE), text_color="white", key="contadorDescargadas")]], background_color="#24262C", scrollable=True, vertical_scroll_only=True, expand_x=True, expand_y=True, size_subsample_height=1, sbar_relief="RELIEF_FLAT", key="columnaDescargadas")],
-                                    [gui.Column([[gui.Text("No descargados:", font=(self.TIPOGRAFIA_3, self.TAMANO_TEXTO_SIMPLE), text_color="red", key="contadorNoDescargadas")]], background_color="#24262C", scrollable=True, vertical_scroll_only=True, expand_x=True, size=(None, 100), size_subsample_height=1, sbar_relief="RELIEF_FLAT", key="columnaNoDescargadas")]]
+                                    [gui.Column([[gui.Text("No descargados:", font=(self.TIPOGRAFIA_3, self.TAMANO_TEXTO_SIMPLE), text_color="red", key="contadorNoDescargadas")]], background_color="#24262C", scrollable=True, vertical_scroll_only=True, expand_x=True, size=(None, 100), size_subsample_height=1, sbar_relief="RELIEF_FLAT", key="columnaNoDescargadas")]  ]
         self.Musify_YouTube = Musify_YouTube(self.urlDescarga, self.rutaDescarga, self.tipoDescarga, self.filtrarNombres, self.MUSIFY_TOOLS)
 
     def actualizarListaDescargas(self):
